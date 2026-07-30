@@ -1,0 +1,22 @@
+services:
+  postgres-dg:
+    image: postgres:16-alpine
+    container_name: postgres-sql-edu
+    environment:
+      POSTGRES_DB: edudb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
+    ports: # Map cổng (Port ở máy thật : Port trong container)
+      - "5432:5432"
+    volumes: # Luu trữ dữ liệu bền vững (không mất data khi xoá container)
+      - pgdata:/var/lib/postgresql/data
+    networks: # Mạng nội bộ để các container giao tiếp với nhau
+      - my-network
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  my-network:
+    driver: bridge
