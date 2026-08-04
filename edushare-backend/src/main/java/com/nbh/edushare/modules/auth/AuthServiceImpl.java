@@ -5,11 +5,13 @@ import com.nbh.edushare.modules.auth.dto.request.RegisterRequest;
 import com.nbh.edushare.modules.auth.dto.response.AccessTokenResponse;
 import com.nbh.edushare.modules.auth.dto.response.AuthTokenResponse;
 import com.nbh.edushare.modules.auth.exception.AuthErrorCode;
+import com.nbh.edushare.modules.auth.refreshtoken.RefreshTokenRotationResult;
 import com.nbh.edushare.modules.auth.refreshtoken.RefreshTokenService;
 import com.nbh.edushare.modules.auth.security.AuthenticatedUser;
 import com.nbh.edushare.modules.auth.security.JwtService;
 import com.nbh.edushare.modules.auth.security.TokenPayload;
 import com.nbh.edushare.modules.user.UserService;
+import com.nbh.edushare.modules.user.dto.response.UserAuthInfo;
 import com.nbh.edushare.modules.user.dto.response.UserSimpleResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,25 @@ class AuthServiceImpl implements AuthService {
 
         AuthenticatedUser authenticatedUser = (AuthenticatedUser) authentication.getPrincipal();
         return createAuthToken(authenticatedUser);
+    }
+
+    public AuthTokenResponse refreshToken(String rawToken){
+        RefreshTokenRotationResult result = refreshTokenService.rotateRefreshToken(rawToken);
+        UserAuthInfo user = userService.findById(result.userId()).orElseThrow(
+                () -> new AppException(AuthErrorCode.REFRESH_TOKEN_USER_NOT_FOUND)
+        );
+
+        AccessTokenResponse accessToken = jwtService.generateAccessToken(TokenPayload.from(user));
+        return AuthTokenResponse.builder()
+                .accessToken(accessToken.getToken())
+                .refreshToken(result.newRawToken())
+                .accessTokenExpiresIn(accessToken.getExpiresIn())
+                .build();
+    }
+
+    @Override
+    public void logout(Long userId, String refreshToken) {
+        this.refreshTokenService.logout(userId, refreshToken);
     }
 
     private AuthTokenResponse createAuthToken(AuthenticatedUser authenticatedUser) {

@@ -3,6 +3,7 @@ package com.nbh.edushare.modules.user;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 
 import java.util.Optional;
 
@@ -11,5 +12,7 @@ interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsernameOrEmail(@Param("usernameOrEmail") String usernameOrEmail);
 
     Optional<User> findByUsernameOrEmail(String username, String email);
+
+    Optional<User> findById(Long id);
 
 }

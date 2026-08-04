@@ -71,5 +71,10 @@ class UserServiceImpl implements UserService {
 //        }
     }
 
+    @Override
+    public Optional<UserAuthInfo> findById(Long id) {
+        return userRepository.findById(id).map(userMapper::toUserAuthInfo);
+    }
+
 
 }

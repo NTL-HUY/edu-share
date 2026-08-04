@@ -15,6 +15,13 @@ public enum AuthErrorCode implements ErrorCode {
     INVALID_CREDENTIALS(401, "Invalid username/email or password"),
 
     TOKEN_HASHING_FAILED(500, "Failed to hash token due to internal security provider issue: %s"),
+
+    REFRESH_TOKEN_NOT_FOUND(401, "Invalid refresh token"),
+    REFRESH_TOKEN_REVOKED(401, "Refresh token has been revoked"),
+    REFRESH_TOKEN_EXPIRED(401, "Refresh token has expired"),
+    REFRESH_TOKEN_USER_NOT_FOUND(401, "Invalid refresh token"),
+    REFRESH_TOKEN_REVOKE_FAILED(409, "Refresh token has already been revoked or does not exist"),
+    REFRESH_TOKEN_INVALID(401, "Invalid refresh token"),
     ;
 
     private final int status;

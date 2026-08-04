@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface UserService {
     UserSimpleResponse createUser(CreateUserCommand command);
     Optional<UserAuthInfo> findByUsernameOrEmail(String usernameOrEmail);
+    Optional<UserAuthInfo> findById(Long id);
 }
