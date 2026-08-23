@@ -1,0 +1,3 @@
+# graphql.config.yml (root project)
+schema: './schema.graphql'
+documents: 'src/**/*.graphql'

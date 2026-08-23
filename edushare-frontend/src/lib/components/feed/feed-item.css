@@ -1,0 +1,137 @@
+@reference "../../../app.css";
+.feed-item {
+	@apply grid grid-cols-[100px_1fr] gap-4 py-4 text-sm;
+}
+
+.metrics {
+	@apply flex flex-col items-end gap-1.5 text-xs text-slate-500;
+}
+.metrics .votes {
+	@apply font-medium text-slate-700;
+}
+
+.content {
+	@apply flex flex-col gap-2;
+}
+.content .title {
+	@apply text-base leading-snug font-normal text-blue-600 hover:text-blue-800;
+}
+.content .description {
+	@apply line-clamp-2 text-xs leading-relaxed text-slate-600;
+}
+
+.footer {
+	@apply mt-1 flex flex-wrap items-center justify-between gap-2;
+}
+.tags-list {
+	@apply flex flex-wrap gap-1;
+}
+.tag-item {
+	@apply rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 hover:bg-slate-200;
+}
+.author-info {
+	@apply flex items-center gap-1.5 text-xs text-slate-500;
+}
+.author-info .avatar {
+	@apply h-4 w-4 rounded-sm;
+}
+.author-info .author-name {
+	@apply text-blue-600 hover:underline;
+}
+.author-info .reputation {
+	@apply font-bold text-slate-700;
+}
+
+
+.feed-item {
+  @apply grid grid-cols-[100px_1fr] gap-4 py-4 text-sm;
+}
+
+/* Metrics Column */
+.metrics {
+  @apply flex flex-col items-end gap-1.5 text-xs text-slate-500;
+}
+.metrics .votes {
+  @apply font-medium text-slate-700;
+}
+
+/* Content Area */
+.content {
+  @apply flex flex-col gap-2;
+}
+
+/* --- BADGES & META HEADER --- */
+.feed-meta-header {
+  @apply flex items-center justify-between gap-2 text-xs;
+}
+
+.badge-group {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+/* Common Badge Style */
+.badge {
+  @apply inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold transition-colors;
+}
+
+/* Badge Type: LESSON */
+.badge-lesson {
+  @apply rounded-full border border-purple-200 bg-purple-50 text-purple-700;
+}
+
+/* Badge Type: QUESTION */
+.badge-question {
+  @apply rounded-full border border-amber-200 bg-amber-50 text-amber-700;
+}
+
+.badge-unresolved {
+  @apply rounded-full border border-rose-200 bg-rose-50 text-rose-700;
+}
+
+/* Badge Level (Beginner / Intermediate / Advanced) */
+.badge-level {
+  @apply border border-emerald-200 bg-emerald-50 text-emerald-700 font-medium;
+}
+
+/* Category & Read Time Info */
+.category-info {
+  @apply font-medium text-slate-500;
+}
+.category-info strong {
+  @apply font-semibold text-slate-700;
+}
+
+.read-time {
+  @apply flex items-center gap-1 font-medium text-slate-500;
+}
+
+/* --- TITLE & DESCRIPTION --- */
+.content .title {
+  @apply text-base font-semibold leading-snug text-blue-600 hover:text-blue-800;
+}
+.content .description {
+  @apply line-clamp-2 text-xs leading-relaxed text-slate-600;
+}
+
+/* --- FOOTER & AUTHOR --- */
+.footer {
+  @apply mt-1 flex flex-wrap items-center justify-between gap-2;
+}
+.tags-list {
+  @apply flex flex-wrap gap-1;
+}
+.tag-item {
+  @apply rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600 hover:bg-slate-200;
+}
+.author-info {
+  @apply flex items-center gap-1.5 text-xs text-slate-500;
+}
+.author-info .avatar {
+  @apply h-4 w-4 rounded-sm;
+}
+.author-info .author-name {
+  @apply font-medium text-blue-600 hover:underline;
+}
+.author-info .reputation {
+  @apply font-bold text-slate-700;
+}

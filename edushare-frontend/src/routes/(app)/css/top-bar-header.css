@@ -1,0 +1,13 @@
+@reference "../../../app.css";
+
+.top-header {
+  @apply mb-6 flex items-center justify-between;
+}
+
+.top-header .title {
+  @apply text-3xl font-normal text-slate-900;
+}
+
+.top-header .btn-ask {
+  @apply rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700;
+}

@@ -33,6 +33,9 @@ class User extends SoftDeleteModel {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Column(name = "is_famous", nullable = false)
+    private Boolean isFamous = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "user_role",nullable = false)
     private UserRole userRole = UserRole.USER;

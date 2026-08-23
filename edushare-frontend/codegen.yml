@@ -1,0 +1,21 @@
+overwrite: true
+schema: 'http://localhost:8080/graphql'
+documents: 'src/lib/graphql/**/*.graphql'
+
+generates:
+  # File 1: Chỉ chứa Type definitions & Query Operations
+  src/lib/generated/types.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+    config:
+      enumsAsTypes: true
+
+  # File 2: Chỉ chứa SDK gọi API (tự động import type từ file types.ts)
+  src/lib/generated/sdk.ts:
+    plugins:
+      - add:
+          content: "import * as Types from './types';"
+      - typescript-graphql-request
+    config:
+      importOperationTypesFrom: 'Types'
