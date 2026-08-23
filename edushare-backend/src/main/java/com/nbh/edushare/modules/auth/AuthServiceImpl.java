@@ -5,6 +5,7 @@ import com.nbh.edushare.modules.auth.dto.request.RegisterRequest;
 import com.nbh.edushare.modules.auth.dto.response.AccessTokenResponse;
 import com.nbh.edushare.modules.auth.dto.response.AuthTokenResponse;
 import com.nbh.edushare.modules.auth.exception.AuthErrorCode;
+import com.nbh.edushare.modules.auth.refreshtoken.GeneratedRefreshToken;
 import com.nbh.edushare.modules.auth.refreshtoken.RefreshTokenRotationResult;
 import com.nbh.edushare.modules.auth.refreshtoken.RefreshTokenService;
 import com.nbh.edushare.modules.auth.security.AuthenticatedUser;
@@ -56,7 +57,7 @@ class AuthServiceImpl implements AuthService {
 
     public AuthTokenResponse refreshToken(String rawToken){
         RefreshTokenRotationResult result = refreshTokenService.rotateRefreshToken(rawToken);
-        UserAuthInfo user = userService.findById(result.userId()).orElseThrow(
+        UserAuthInfo user = userService.findProjectedById(result.userId(), UserAuthInfo.class).orElseThrow(
                 () -> new AppException(AuthErrorCode.REFRESH_TOKEN_USER_NOT_FOUND)
         );
 
@@ -65,6 +66,7 @@ class AuthServiceImpl implements AuthService {
                 .accessToken(accessToken.getToken())
                 .refreshToken(result.newRawToken())
                 .accessTokenExpiresIn(accessToken.getExpiresIn())
+                .refreshTokenExpiresIn(result.expiresAt().toEpochMilli())
                 .build();
     }
 
@@ -75,12 +77,12 @@ class AuthServiceImpl implements AuthService {
 
     private AuthTokenResponse createAuthToken(AuthenticatedUser authenticatedUser) {
         AccessTokenResponse accessToken = jwtService.generateAccessToken(TokenPayload.from(authenticatedUser));
-        String refreshToken = refreshTokenService.generateRefreshToken(authenticatedUser.getUserAuthInfo().id());
-
+        GeneratedRefreshToken refreshToken = refreshTokenService.generateRefreshToken(authenticatedUser.getUserAuthInfo().getId());
         return AuthTokenResponse.builder()
                 .accessToken(accessToken.getToken())
                 .accessTokenExpiresIn(accessToken.getExpiresIn())
-                .refreshToken(refreshToken)
+                .refreshToken(refreshToken.rawToken())
+                .refreshTokenExpiresIn(refreshToken.expiresAt().toEpochMilli())
                 .build();
 
     }

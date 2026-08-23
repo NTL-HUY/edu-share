@@ -4,7 +4,9 @@ import com.nbh.edushare.common.exception.AppException;
 import com.nbh.edushare.modules.auth.dto.response.AuthTokenResponse;
 import com.nbh.edushare.modules.auth.exception.AuthErrorCode;
 import com.nbh.edushare.modules.auth.security.JwtService;
+import com.nbh.edushare.modules.user.exception.UserErrorCode;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,20 +33,20 @@ class RefreshTokenServiceImpl implements RefreshTokenService {
 
 
     @Override
-    public String generateRefreshToken(Long userId) {
+    public GeneratedRefreshToken generateRefreshToken(Long userId) {
         String rawToken = generateRefreshTokenStr();
         String tokenHash = hashRefreshTokenStr(rawToken);
-
+        Instant expiresAt = Instant.now().plus(Duration.ofDays(refreshTokenTtlDays));
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setTokenHash(tokenHash);
-        refreshToken.setExpiresAt(Instant.now().plus(Duration.ofDays(refreshTokenTtlDays)));
+        refreshToken.setExpiresAt(expiresAt);
 
         UserRef userRef = entityManager.getReference(UserRef.class, userId);
         refreshToken.setUser(userRef);
 
 
         refreshTokenRepository.save(refreshToken);
-        return rawToken;
+        return new GeneratedRefreshToken(rawToken, expiresAt);
     }
 
     private RefreshToken  verifyAndGetRefreshToken(String rawToken) {
@@ -60,6 +62,12 @@ class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new AppException(AuthErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
+        try {
+            refreshToken.getUser().getId(); // force load, kiểm tra user còn tồn tại (chưa bị filter)
+        } catch (EntityNotFoundException e) {
+            throw new AppException(UserErrorCode.USER_INACTIVE);
+        }
+
         return refreshToken;
     }
 
@@ -72,9 +80,9 @@ class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new AppException(AuthErrorCode.REFRESH_TOKEN_REVOKE_FAILED);
         }
         Long userId = oldToken.getUser().getId();
-        String newRawToken = generateRefreshToken(userId);
+        GeneratedRefreshToken newToken = generateRefreshToken(userId);
 
-        return new RefreshTokenRotationResult(userId, newRawToken);
+        return new RefreshTokenRotationResult(userId, newToken.rawToken(), newToken.expiresAt());
     }
 
     @Override

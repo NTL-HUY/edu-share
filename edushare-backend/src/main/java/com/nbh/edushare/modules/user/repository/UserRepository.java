@@ -1,18 +1,18 @@
-package com.nbh.edushare.modules.user;
+package com.nbh.edushare.modules.user.repository;
 
+import com.nbh.edushare.modules.user.pojo.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.lang.NonNull;
 
 import java.util.Optional;
 
-interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.username = :usernameOrEmail OR u.email = :usernameOrEmail")
-    Optional<User> findByUsernameOrEmail(@Param("usernameOrEmail") String usernameOrEmail);
+    <T> Optional<T> findByUsernameOrEmail(@Param("usernameOrEmail") String usernameOrEmail, Class<T> type);
 
     Optional<User> findByUsernameOrEmail(String username, String email);
 
-    Optional<User> findById(Long id);
+    <T> Optional<T> findProjectedById(Long id, Class<T> type);
 
 }

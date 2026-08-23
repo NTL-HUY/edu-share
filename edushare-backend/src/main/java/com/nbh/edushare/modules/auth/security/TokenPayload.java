@@ -8,15 +8,15 @@ public record TokenPayload(
 ) {
     public static TokenPayload from(AuthenticatedUser user) {
         return new TokenPayload(
-                String.valueOf(user.getUserAuthInfo().id()),
-                user.getUserAuthInfo().role()
+                String.valueOf(user.getUserAuthInfo().getId()),
+                user.getUserAuthInfo().getUserRole().name()
         );
     }
 
     public static TokenPayload from(UserAuthInfo user) {
         return new TokenPayload(
-                String.valueOf(user.id()),
-                user.role()
+                String.valueOf(user.getId()),
+                user.getUserRole().name()
         );
     }
 }

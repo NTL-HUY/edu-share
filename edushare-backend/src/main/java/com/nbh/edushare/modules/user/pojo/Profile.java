@@ -1,4 +1,4 @@
-package com.nbh.edushare.modules.user;
+package com.nbh.edushare.modules.user.pojo;
 
 
 import com.nbh.edushare.common.model.TimeStampedModel;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @NoArgsConstructor
-class Profile extends TimeStampedModel {
+public class Profile extends TimeStampedModel {
     @Id
     private Long id;
 

@@ -1,16 +1,16 @@
 package com.nbh.edushare.modules.auth.refreshtoken;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.Where;
 
-@Entity
+@Entity(name = "AuthUserRef")
 @Table(name = "users")
 @Immutable
 @Getter
+@SQLRestriction("deleted_at IS NULL")
 class UserRef {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

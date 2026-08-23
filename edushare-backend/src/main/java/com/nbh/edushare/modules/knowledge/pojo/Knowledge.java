@@ -1,21 +1,22 @@
-package com.nbh.edushare.modules.knowledge;
+package com.nbh.edushare.modules.knowledge.pojo;
 
 
 import com.nbh.edushare.common.model.SoftDeleteModel;
-import com.nbh.edushare.modules.knowledge.enums.KnowledgeStatus;
 import com.nbh.edushare.modules.knowledge.enums.KnowledgeType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "knowledge")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
+@Setter
 @NoArgsConstructor
-@SuperBuilder
-abstract class Knowledge extends SoftDeleteModel {
+@SQLRestriction("deleted_at IS NULL")
+public abstract class Knowledge extends SoftDeleteModel {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, updatable = false)
@@ -24,11 +25,8 @@ abstract class Knowledge extends SoftDeleteModel {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "slug", nullable = false, unique = true)
-    private String slug;
-
     @Column(name = "abstract")
-    private String abstractText; // "abstract" là keyword Java, đặt tên khác + @Column ánh xạ lại
+    private String abstractText;
 
     @Column(name = "thumbnail_url")
     private String thumbnailUrl;
@@ -43,25 +41,20 @@ abstract class Knowledge extends SoftDeleteModel {
     @Column(name = "allow_comment", nullable = false)
     private Boolean allowComment;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private KnowledgeStatus status;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
+    private Category category;
 
-    // deleted_by cần một UserRef khác hoặc tái dùng field có sẵn trong SoftDeleteModel
-    // (tuỳ bạn đã định nghĩa gì trong common/model/SoftDeleteModel — kiểm tra lại field trùng)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by", referencedColumnName = "id")
+    private UserRef deletedBy;
 
-    public void publish() {
-        this.status = KnowledgeStatus.PUBLISHED;
-    }
+    @Column(name = "views_count", nullable = false)
+    private Integer viewsCount = 0;
 
-    public void archive() {
-        this.status = KnowledgeStatus.ARCHIVED;
-    }
+    @Column(name = "vote_score", nullable = false)
+    private Integer voteScore = 0;
 
-    // Domain method để service không thao túng field trực tiếp từ ngoài entity
-    public void updateBasicInfo(String title, String abstractText, String thumbnailUrl) {
-        this.title = title;
-        this.abstractText = abstractText;
-        this.thumbnailUrl = thumbnailUrl;
-    }
+    @Column(name = "comment_count", nullable = false)
+    private Integer commentCount = 0;
 }

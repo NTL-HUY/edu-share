@@ -1,4 +1,4 @@
-package com.nbh.edushare.modules.user;
+package com.nbh.edushare.modules.user.pojo;
 
 
 import com.nbh.edushare.common.model.SoftDeleteModel;
@@ -15,7 +15,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Setter
 @NoArgsConstructor
 @SQLRestriction("deleted_at IS NULL")
-class User extends SoftDeleteModel {
+public class User extends SoftDeleteModel {
 
     // đánh thêm partial unique bằng sql
     @Column(nullable = false,  length = 50)

@@ -1,12 +1,12 @@
 package com.nbh.edushare.modules.user.dto.response;
 
+import com.nbh.edushare.modules.user.enums.UserRole;
+
 import java.time.LocalDateTime;
 
-public record UserAuthInfo(
-        Long id,
-        String email,
-        String username,
-        String passwordHash,
-        String role,
-        LocalDateTime deletedAt
-) {}
+public interface UserAuthInfo extends UserBaseProjection {
+    String getPasswordHash();
+    UserRole getUserRole();
+    LocalDateTime getDeletedAt();
+    Boolean getIsFamous();
+}

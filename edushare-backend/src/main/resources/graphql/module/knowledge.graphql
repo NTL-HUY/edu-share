@@ -1,0 +1,137 @@
+
+enum KnowledgeType {
+    LESSON
+    QUESTION
+}
+
+enum LessonLevel {
+    BEGINNER
+    INTERMEDIATE
+    ADVANCED
+}
+
+interface Knowledge {
+    id: ID!
+    type: KnowledgeType!
+    title: String!
+    abstractText: String
+    thumbnailUrl: String
+    isPublic: Boolean!
+    allowComment: Boolean!
+    owner: UserSimple!
+    category: Category
+    comments(input: CommentGetInput): CommentPage
+    viewsCount: Int!
+    voteScore: Int!
+    commentCount: Int!
+    createdAt: String
+    currentUserVote: Int
+}
+
+type Lesson implements Knowledge {
+    id: ID!
+    type: KnowledgeType!
+    title: String!
+    abstractText: String
+    thumbnailUrl: String
+    isPublic: Boolean!
+    allowComment: Boolean!
+    owner: UserSimple!
+    category: Category
+    contentMarkdown: String
+    level: LessonLevel
+    estimateTimeInMinutes: Int
+    createdAt: String
+    viewsCount: Int!
+    voteScore: Int!
+    commentCount: Int!
+    comments(input: CommentGetInput): CommentPage
+    currentUserVote: Int
+
+}
+
+type Question implements Knowledge {
+    id: ID!
+    type: KnowledgeType!
+    title: String!
+    abstractText: String
+    thumbnailUrl: String
+    isPublic: Boolean!
+    allowComment: Boolean!
+    owner: UserSimple!
+    content: String
+    category: Category
+    isResolved: Boolean!
+    acceptedAnswerId: ID
+    createdAt: String
+    viewsCount: Int!
+    voteScore: Int!
+    commentCount: Int!
+    comments(input: CommentGetInput): CommentPage
+    currentUserVote: Int
+}
+
+type Category {
+    id: ID!
+    name: String!
+}
+
+input CreateLessonInput {
+    title: String!
+    abstractText: String
+    thumbnailUrl: String
+    isPublic: Boolean! = true
+    allowComment: Boolean! = true
+    contentMarkdown: String
+    level: LessonLevel
+    isPreview: Boolean! = false
+    estimateTimeInMinutes: Int
+    categoryId: ID
+
+}
+
+input CreateQuestionInput {
+    title: String!
+    abstractText: String
+    thumbnailUrl: String
+    isPublic: Boolean! = true
+    allowComment: Boolean! = true
+    content: String
+    categoryId: ID
+}
+
+input UpdateLessonInput {
+    id: ID!
+    title: String
+    abstractText: String
+    thumbnailUrl: String
+    isPublic: Boolean
+    allowComment: Boolean
+    categoryId: ID
+    contentMarkdown: String
+    level: LessonLevel
+    estimateTimeInMinutes: Int
+}
+
+input UpdateQuestionInput {
+    id: ID!
+    title: String
+    abstractText: String
+    thumbnailUrl: String
+    isPublic: Boolean
+    allowComment: Boolean
+    categoryId: ID
+    content: String
+    isResolved: Boolean
+}
+
+extend type Mutation {
+    createLesson(input: CreateLessonInput!): Lesson!
+    createQuestion(input: CreateQuestionInput!): Question!
+    updateLesson(input: UpdateLessonInput!): Lesson!
+    updateQuestion(input: UpdateQuestionInput!): Question!
+}
+
+extend type Query {
+    knowledge(id: ID!): Knowledge
+}

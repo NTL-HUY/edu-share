@@ -1,0 +1,5 @@
+type UserSimple {
+    id: ID!
+    username: String
+    avatarUrl: String
+}

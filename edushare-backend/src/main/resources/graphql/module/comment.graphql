@@ -1,0 +1,36 @@
+type Comment {
+    id: ID!
+    knowledgeId: ID!
+    userId: ID!
+    userName: String!
+    userAvatarUrl: String
+    content: String!
+
+    rootCommentId: ID
+    replyToCommentId: ID
+    replyToUserName: String
+    replyCount: Int!
+
+    createdAt: String!
+    updatedAt: String
+    deletedAt: String
+    deletedBy: ID
+}
+
+type CommentPage {
+    content: [Comment!]!
+    totalElements: Int!
+    number: Int!          # Đổi page -> number
+    totalPages: Int!
+    size: Int!
+}
+input CommentGetInput {
+    number: Int
+    size: Int
+    sort: String
+}
+
+#extend type Query {
+#    getRootComment(input: FeedQueryInput): FeedPage!
+#}
+
