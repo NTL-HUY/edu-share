@@ -1,11 +1,11 @@
 package com.nbh.edushare.modules.knowledge;
 
 import com.nbh.edushare.common.exception.AppException;
-import com.nbh.edushare.modules.interaction.InteractionService;
-import com.nbh.edushare.modules.interaction.dto.request.VoteValueProjection;
 import com.nbh.edushare.modules.knowledge.dto.command.UpdateLessonCommand;
 import com.nbh.edushare.modules.knowledge.dto.command.UpdateQuestionCommand;
+import com.nbh.edushare.modules.knowledge.dto.request.KnowledgeFilterInput;
 import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeDetailResponse;
+import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeManageProjection;
 import com.nbh.edushare.modules.knowledge.event.update.KnowledgeUpdatedEvent;
 import com.nbh.edushare.modules.knowledge.exception.CategoryErrorCode;
 import com.nbh.edushare.modules.knowledge.exception.KnowledgeErrorCode;
@@ -28,6 +28,7 @@ import com.nbh.edushare.modules.user.exception.UserErrorCode;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,6 @@ class KnowledgeServiceImpl implements KnowledgeService {
     private final EntityManager entityManager;
     private final LessonMapper lessonMapper;
     private final KnowledgeRepository knowledgeRepository;
-    private final InteractionService interactionService;
 
     private final UserService userService;
     private final KnowledgeEventMapper knowledgeEventMapper;
@@ -131,6 +131,13 @@ class KnowledgeServiceImpl implements KnowledgeService {
         Knowledge knowledge = knowledgeRepository.findById(knowledgeId)
                 .orElseThrow(() -> new AppException(KnowledgeErrorCode.KNOWLEDGE_NOT_FOUND));
         return builDetailResponse(knowledge);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<KnowledgeDetailResponse> getMyKnowledgeList(Long userId, KnowledgeFilterInput filter) {
+        Page<Knowledge> page = knowledgeRepository.findByOwnerIdAndDeletedAtIsNull(userId, filter.toPageable());
+        return page.map(this::builDetailResponse);
     }
 
 

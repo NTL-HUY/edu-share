@@ -5,6 +5,7 @@
 	import type { FeedSearchInput } from '$lib/generated/types';
 	import type { PageData } from '../$types';
 
+	import '$lib/styles/base-feed.css';
 	let { data }: { data: PageData } = $props();
 	// 1. Lấy giá trị từ URL Params
 	let query = $derived(page.url.searchParams.get('q') || '');
@@ -62,28 +63,14 @@
 <!-- TOP FILTER BAR (Nằm ngang thay vì cột bên trái) -->
 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 py-3 text-xs">
 	<div class="flex flex-wrap items-center gap-2">
-		<div class="flex rounded border border-gray-200 bg-gray-100 p-0.5">
-			<button
-				class="rounded px-2.5 py-1 font-medium transition-all {currentType === ''
-					? 'bg-white text-gray-800 shadow-sm'
-					: 'text-gray-600 hover:text-gray-900'}"
-				onclick={() => updateFilter('type', null)}>
-				Tất cả
-			</button>
+		<div class="filter-tabs-group">
+			<button class="filter-tab-btn {currentType === '' ? 'filter-tab-btn-active' : ''}" onclick={() => updateFilter('type', null)}>Tất cả</button>
 
-			<button
-				class="rounded px-2.5 py-1 font-medium transition-all {currentType === 'LESSON'
-					? 'bg-white text-gray-800 shadow-sm'
-					: 'text-gray-600 hover:text-gray-900'}"
-				onclick={() => updateFilter('type', 'LESSON')}>
+			<button class="filter-tab-btn {currentType === 'LESSON' ? 'filter-tab-btn-active' : ''}" onclick={() => updateFilter('type', 'LESSON')}>
 				Bài học
 			</button>
 
-			<button
-				class="rounded px-2.5 py-1 font-medium transition-all {currentType === 'QUESTION'
-					? 'bg-white text-gray-800 shadow-sm'
-					: 'text-gray-600 hover:text-gray-900'}"
-				onclick={() => updateFilter('type', 'QUESTION')}>
+			<button class="filter-tab-btn {currentType === 'QUESTION' ? 'filter-tab-btn-active' : ''}" onclick={() => updateFilter('type', 'QUESTION')}>
 				Hỏi đáp
 			</button>
 		</div>

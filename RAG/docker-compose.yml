@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  # 1. Container Ollama
+  ollama:
+    image: ollama/ollama:latest
+    container_name: edushare-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_storage:/root/.ollama
+    networks:
+      - ai-network
+
+volumes:
+  ollama_storage:
+    name: edushare_ollama_storage
+
+networks:
+  ai-network:
+    driver: bridge

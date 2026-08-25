@@ -20,7 +20,7 @@ interface Knowledge {
     allowComment: Boolean!
     owner: UserSimple!
     category: Category
-    comments(input: CommentGetInput): CommentPage
+    comments(input: CommentQueryInput): CommentCursorPaging!
     viewsCount: Int!
     voteScore: Int!
     commentCount: Int!
@@ -45,9 +45,9 @@ type Lesson implements Knowledge {
     viewsCount: Int!
     voteScore: Int!
     commentCount: Int!
-    comments(input: CommentGetInput): CommentPage
-    currentUserVote: Int
+    comments(input: CommentQueryInput): CommentCursorPaging!
 
+    currentUserVote: Int
 }
 
 type Question implements Knowledge {
@@ -67,14 +67,11 @@ type Question implements Knowledge {
     viewsCount: Int!
     voteScore: Int!
     commentCount: Int!
-    comments(input: CommentGetInput): CommentPage
+    comments(input: CommentQueryInput): CommentCursorPaging!
     currentUserVote: Int
 }
 
-type Category {
-    id: ID!
-    name: String!
-}
+
 
 input CreateLessonInput {
     title: String!
@@ -125,6 +122,20 @@ input UpdateQuestionInput {
     isResolved: Boolean
 }
 
+input MyKnowledgeFilterInput {
+    number: Int = 0
+    size: Int = 20
+    sort: String = "createdAt,desc"
+}
+
+type KnowledgePagePayload {
+    content: [Knowledge!]!
+    totalElements: Int!
+    totalPages: Int!
+    number: Int!
+    size: Int!
+}
+
 extend type Mutation {
     createLesson(input: CreateLessonInput!): Lesson!
     createQuestion(input: CreateQuestionInput!): Question!
@@ -134,4 +145,5 @@ extend type Mutation {
 
 extend type Query {
     knowledge(id: ID!): Knowledge
+    myKnowledgeList(input: MyKnowledgeFilterInput): KnowledgePagePayload!
 }

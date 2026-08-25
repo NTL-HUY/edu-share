@@ -49,6 +49,7 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"carta-md": "^4.11.2",
 		"graphql": "^16.14.2",
 		"graphql-request": "^7.4.0",
 		"highlight.js": "^11.12.0",
@@ -56,7 +57,7 @@
 		"lucide-svelte": "^1.0.1",
 		"marked": "^18.0.10",
 		"marked-highlight": "^2.2.4",
-		"svelte-french-toast": "^1.2.0",
+		"svelte-sonner": "^1.2.1",
 		"zod": "^4.4.3"
 	}
 }

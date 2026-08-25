@@ -1,10 +1,11 @@
 <script lang="ts">
    import { page } from '$app/state';
-   import { House, Bot, Tag, Trophy, MessageSquare, FileText, Users, Building2, CodeXml, CircleHelpIcon, Search } from 'lucide-svelte';
+   import { House, Bot, Tag, Trophy, MessageSquare, FileText, Users, Building2, CodeXml, CircleHelpIcon, Search, AlignHorizontalDistributeEndIcon } from 'lucide-svelte';
 
    const navItems = [
       { label: 'Dành cho bạn', path: '/', icon: House },
       { label: 'Tìm kiếm & Khám phá', path: '/search', icon: Search },
+      { label: '+ Tạo nội dung mới', path: '/feed/create', icon: AlignHorizontalDistributeEndIcon },
       { label: 'AI Assist', path: '/feed', icon: Bot, isSpecial: true },
       { label: 'Tags', path: '/tags', icon: Tag },
       {

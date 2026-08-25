@@ -1,20 +1,16 @@
 <script lang="ts">
 	import { SlidersHorizontal, ChevronDown, BookOpen, Clock, HelpCircle } from 'lucide-svelte';
-	import './css/filter-bar.css';
-	import './css/top-bar-header.css';
-	import './css/filter-toolbar.css';
+	import '$lib/styles/filter-bar.css';
+	import '$lib/styles/top-bar-header.css';
+	import '$lib/styles/filter-toolbar.css';
+	import '$lib/styles/base-feed.css';
 	import { isLessonFeedMeta, isQuestionFeedMeta } from '$lib/utils/checkTypeName';
 	import type { PageData } from './$types';
 	import { formatTimeAgo } from '$lib/utils/time';
 	import FeedItem from '$lib/components/feed/FeedItem.svelte';
 	import { createSdk } from '$lib/graphql/client';
-	const tabs = ['Tất cả', 'Bài học', 'Hỏi Đáp'];
-	let activeTab = $state('Tất cả');
+	import Button from '$lib/components/ui/button/button.svelte';
 	let { data }: { data: PageData } = $props();
-
-	function selectTab(tab: string) {
-		activeTab = tab;
-	}
 
 	let items = $state(data.feed?.items ?? []);
 	let cursor = $state(data.feed?.nextCursor ?? null);
@@ -54,27 +50,24 @@
 			{ rootMargin: '200px' }
 		);
 		observer.observe(divEndFeed);
-		return () => observer.disconnect(); 
+		return () => observer.disconnect();
 	});
 </script>
 
 <div class="mx-auto max-w-5xl text-slate-800">
-	<!-- Controls & Filter Bar -->
+	<!-- Controls  Filter Bar -->
 	<div class="filter-bar">
 		<div>
-			<h1 class="text-xl font-bold text-gray-900">Bảng tin cá nhân</h1>
-			<p class="text-xs text-gray-500">Cập nhật mới nhất từ nền tảng và người dùng bạn quan tâm</p>
+			<h1 class="page-header-title">Bảng tin cá nhân</h1>
+			<p class="page-header-desc">Cập nhật mới nhất từ nền tảng và người dùng bạn quan tâm</p>
 		</div>
 
-		<div class="controls-group">
-			<div class="tabs-container">
-				{#each tabs as tab}
-					<button onclick={() => (activeTab = tab)} class="tab-btn {activeTab === tab ? 'active' : ''}">
-						{tab}
-					</button>
-				{/each}
-			</div>
-		</div>
+		<!-- create question -->
+		<a
+			href="/feed/create"
+			class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow active:scale-95">
+			+ Tạo câu hỏi / kiến thức
+		</a>
 	</div>
 
 	<!-- Questions List -->
@@ -91,5 +84,4 @@
 	{:else if !hasMore && items.length > 0}
 		<p class="py-4 text-center text-xs text-slate-400">Đã hết dữ liệu</p>
 	{/if}
-
 </div>

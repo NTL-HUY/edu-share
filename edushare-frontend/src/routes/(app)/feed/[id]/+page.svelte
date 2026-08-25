@@ -1,17 +1,18 @@
 <!-- src/routes/feed/[id]/+page.svelte -->
 <script lang="ts">
+	import '$lib/components/feed/feed-item.css';
 	import { Eye, Clock, HelpCircle, BookOpen } from 'lucide-svelte';
 	import { isLesson, isQuestion } from '$lib/utils/checkTypeName';
 	import { formatTimeAgo } from '$lib/utils/time';
 	import MarkdownContent from '$lib/components/feed/MarkdownContent.svelte';
 	import { page } from '$app/state';
-	import toast from 'svelte-french-toast';
+	
 	import type { FeedPageData } from './+page.server';
 
-	// Sub-components
 	import VoteSidebar from './_components/VoteSidebar.svelte';
 	import CommentItem from './_components/CommentItem.svelte';
 	import { createCommentState } from './_components/commentState.svelte';
+	import { toast } from 'svelte-sonner';
 
 	let { data }: { data: FeedPageData } = $props();
 
@@ -19,11 +20,18 @@
 	let feedItem = $derived(data.knowledge);
 	let comments = $derived(feedItem?.comments);
 
-	// Khoi tao state comment
-	const commentState = createCommentState(feedItem?.id ?? '');
+	const commentState = createCommentState(
+		feedItem?.id ?? '',
+		feedItem?.comments?.items ?? [],
+		feedItem?.comments?.nextCursor ?? null,
+		feedItem?.comments?.hasMore ?? false
+	);
 
 	$effect(() => {
-		if (data.serverError) toast.error(data.serverError);
+		if (data.serverError) {
+			toast.error(data.serverError);
+			console.error(data.serverError);
+		}
 	});
 </script>
 
@@ -85,7 +93,7 @@
 		<div class="flex items-center justify-between border-b border-gray-200 pb-3">
 			<h3 class="text-base font-bold text-gray-900">
 				Bình luận &amp; Thảo luận
-				<span class="ml-1 text-xs font-normal text-gray-500">({comments?.totalElements ?? 0} bình luận)</span>
+				<span class="ml-1 text-xs font-normal text-gray-500">({feedItem?.commentCount ?? 0} bình luận)</span>
 			</h3>
 		</div>
 
@@ -99,8 +107,12 @@
 			<div class="flex-1 space-y-2">
 				{#if commentState.replyingTo}
 					<div class="flex items-center justify-between rounded-md bg-orange-50 px-3 py-1.5 text-xs text-orange-700">
-						<span>Đang trả lời <strong class="font-semibold">@{commentState.replyingTo.userName}</strong></span>
-						<button type="button" onclick={() => (commentState.replyingTo = null)} class="font-bold text-orange-500 hover:text-orange-800">✕ Hủy</button>
+						<span>
+							Đang trả lời <strong class="font-semibold">@{commentState.replyingTo.userName}</strong>
+						</span>
+						<button type="button" onclick={() => (commentState.replyingTo = null)} class="font-bold text-orange-500 hover:text-orange-800">
+							✕ Hủy
+						</button>
 					</div>
 				{/if}
 
@@ -108,7 +120,8 @@
 					bind:value={commentState.content}
 					rows="3"
 					placeholder="Viết bình luận hoặc đặt câu hỏi..."
-					class="w-full rounded-lg border border-gray-300 p-3 text-xs transition focus:border-orange-500 focus:outline-none"></textarea>
+					class="w-full rounded-lg border border-gray-300 p-3 text-xs transition focus:border-orange-500 focus:outline-none">
+				</textarea>
 
 				<div class="flex justify-end">
 					<button
@@ -124,15 +137,29 @@
 
 		<!-- Danh sách Bình luận -->
 		<div class="mt-4 space-y-4 divide-y divide-gray-100">
-			{#if comments?.content && comments.content.length > 0}
-				{#each comments.content as comment (comment.id)}
+			{#if commentState.commentsList.length > 0}
+				{#each commentState.commentsList as comment (comment.id)}
 					<CommentItem
 						{comment}
 						ownerUsername={feedItem?.owner.username}
-						onReply={(target) => (commentState.replyingTo = target)} />
+						onReply={(target) => (commentState.replyingTo = target)}
+						replyState={commentState.getReplyState(comment.id)}
+						onToggleReplies={commentState.toggleReplies}
+						/>
 				{/each}
+				{#if commentState.hasMore}
+					<div class="pt-4 text-center">
+						<button
+							type="button"
+							disabled={commentState.isLoadingMore}
+							onclick={commentState.loadMore}
+							class="rounded-md bg-gray-100 px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50">
+							{commentState.isLoadingMore ? 'Đang tải thêm...' : 'Xem thêm bình luận'}
+						</button>
+					</div>
+				{/if}
 			{:else}
-				<p class="pt-6 text-center text-xs italic text-gray-400">Chưa có bình luận nào. Hãy là người đầu tiên thảo luận!</p>
+				<p class="pt-6 text-center text-xs text-gray-400 italic">Chưa có bình luận nào. Hãy là người đầu tiên thảo luận!</p>
 			{/if}
 		</div>
 	</section>

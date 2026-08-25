@@ -17,4 +17,9 @@ public class AppException extends RuntimeException {
         this.errorCode = errorCode;
     }
 
+    public AppException(String customMessage) {
+        super(customMessage);
+        this.errorCode = new GenericErrorCode(400, customMessage);
+    }
+
 }

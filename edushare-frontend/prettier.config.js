@@ -3,7 +3,7 @@ const config = {
 	useTabs: true,
 	singleQuote: true,
 	trailingComma: 'none',
-	printWidth: 150,
+	printWidth: 120,
 	bracketSameLine: true,
 	singleAttributePerLine: false,
 	htmlWhitespaceSensitivity: 'ignore',

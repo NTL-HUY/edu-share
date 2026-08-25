@@ -2,8 +2,8 @@
 	import Header from '$lib/components/common/Header.svelte';
 	import Sidebar from '$lib/components/common/Sidebar.svelte';
 	import Footer from '$lib/components/common/Footer.svelte';
-   import { Toaster } from 'svelte-french-toast';
-   import '../../app.css';
+   import { Toaster } from 'svelte-sonner';
+   import '$lib/styles/app.css';
 	let { children } = $props();
 </script>
 

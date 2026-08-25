@@ -72,9 +72,9 @@ query searchFeed($input: FeedSearchInput!) {
 	}
 }
 
-query GetKnowledgeDetail($id: ID!, $commentInput: CommentGetInput) {
+query GetKnowledgeDetail($id: ID!, $commentInput: CommentQueryInput) {
 	knowledge(id: $id) {
-      __typename
+		__typename
 		id
 		title
 		type
@@ -88,7 +88,7 @@ query GetKnowledgeDetail($id: ID!, $commentInput: CommentGetInput) {
 		voteScore
 		commentCount
 		createdAt
-      currentUserVote
+		currentUserVote
 		owner {
 			id
 			username
@@ -111,7 +111,7 @@ query GetKnowledgeDetail($id: ID!, $commentInput: CommentGetInput) {
 
 		# Sub-field lấy danh sách bình luận gốc
 		comments(input: $commentInput) {
-			content {
+			items {
 				id
 				knowledgeId
 				userId
@@ -125,10 +125,11 @@ query GetKnowledgeDetail($id: ID!, $commentInput: CommentGetInput) {
 				createdAt
 				updatedAt
 			}
-			totalElements
-			totalPages
-			number
-			size
+			hasMore
+			nextCursor
 		}
 	}
 }
+
+
+

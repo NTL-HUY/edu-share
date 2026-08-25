@@ -1,5 +1,7 @@
 package com.nbh.edushare.modules.interaction;
 
+import com.nbh.edushare.common.utils.CursorPaging;
+import com.nbh.edushare.modules.interaction.dto.request.CommentQueryInput;
 import com.nbh.edushare.modules.interaction.dto.request.CreateCommentRequest;
 import com.nbh.edushare.modules.interaction.dto.request.VoteRequest;
 import com.nbh.edushare.modules.interaction.dto.response.CommentResponse;
@@ -16,6 +18,8 @@ public interface InteractionService {
     CommentResponse createComment(Long knowledgeId, Long userId, CreateCommentRequest request);
 
     Page<CommentResponse> listRootComments(Long knowledgeId, Pageable pageable);
+
+    CursorPaging<CommentResponse> listRootComments(Long knowledgeId, CommentQueryInput commentQueryInput);
 
     List<CommentResponse> listReplies(Long knowledgeId, Long rootCommentId);
 

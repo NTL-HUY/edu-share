@@ -1,6 +1,9 @@
 package com.nbh.edushare.modules.knowledge.repository;
 
+import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeManageProjection;
 import com.nbh.edushare.modules.knowledge.pojo.Knowledge;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -31,4 +34,6 @@ public interface KnowledgeRepository extends JpaRepository<Knowledge, Long> {
                        @Param("views") int views,
                        @Param("votes") int votes,
                        @Param("comments") int comments);
+
+    Page<Knowledge> findByOwnerIdAndDeletedAtIsNull(Long ownerId, Pageable pageable);
 }

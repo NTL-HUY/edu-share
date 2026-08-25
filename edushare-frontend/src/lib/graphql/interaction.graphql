@@ -1,0 +1,36 @@
+query ListRootComments($knowledgeId: ID!, $input: CommentQueryInput) {
+  listRootComments(knowledgeId: $knowledgeId, input: $input) {
+    hasMore
+    nextCursor
+    items {
+      id
+      knowledgeId
+      userId
+      userName
+      userAvatarUrl
+      content
+      replyCount
+      createdAt
+    }
+  }
+}
+
+query listCommentReplies ($knowledgeId: ID!, $rootCommentId: ID!) {
+    listCommentReplies(knowledgeId: $knowledgeId, rootCommentId: $rootCommentId) {
+        id
+        knowledgeId
+        userId
+        userName
+        userAvatarUrl
+        content
+        rootCommentId
+        replyToCommentId
+        replyToUserName
+        replyCount
+        createdAt
+        updatedAt
+        deletedAt
+        deletedBy
+    }
+}
+

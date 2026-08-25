@@ -48,7 +48,35 @@ export async function apiRequest<T>(
 }
 
 
+export async function apiUploadRequest<T>(
+   fetchFn: typeof fetch,
+   endpoint: string,
+   formData: FormData
+): Promise<ApiResult<T>> {
+   let res: Response;
+   try {
+      res = await fetchFn(endpoint, {
+         method: 'POST',
+         body: formData
+      });
+   } catch (error) {
+      console.error(`Không kết nối được backend (${endpoint}):`, error);
+      return { ok: false, status: 503, message: 'Hệ thống đang bảo trì, vui lòng thử lại sau' };
+   }
 
+   if (!res.ok) {
+      const errorBody = await res.json().catch(() => null);
+      return {
+         ok: false,
+         status: res.status,
+         message: errorBody?.message ?? DEFAULT_MESSAGES[res.status] ?? 'Có lỗi xảy ra, vui lòng thử lại sau',
+         fieldErrors: errorBody?.errors ?? errorBody?.fieldErrors
+      };
+   }
+
+   const data: T = await res.json();
+   return { ok: true, data };
+}
 // interface GraphQLResponse<T> {
 //   data?: T;
 //   errors?: { message: string; extensions?: Record<string, unknown> }[];

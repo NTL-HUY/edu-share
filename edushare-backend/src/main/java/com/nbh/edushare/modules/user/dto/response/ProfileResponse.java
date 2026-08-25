@@ -4,6 +4,11 @@ import java.math.BigDecimal;
 
 public record ProfileResponse(
         Long userId,
+        String username,
+        String email,
+        String fullName,
+        String avatarUrl,
+        Boolean isFamous,
         String studentId,
         String university,
         String faculty,
@@ -12,6 +17,9 @@ public record ProfileResponse(
         String academicYear,
         BigDecimal cpa,
         String bio,
-        String coverUrl
+        String coverUrl,
+        Boolean isMe,
+        Boolean isFollowing
 ) {
+
 }

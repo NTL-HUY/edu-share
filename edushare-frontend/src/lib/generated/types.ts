@@ -37,20 +37,16 @@ export type Comment = {
   userName: Scalars['String']['output'];
 };
 
-export type CommentGetInput = {
-  number?: InputMaybe<Scalars['Int']['input']>;
-  size?: InputMaybe<Scalars['Int']['input']>;
-  sort?: InputMaybe<Scalars['String']['input']>;
+export type CommentCursorPaging = {
+  __typename?: 'CommentCursorPaging';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<Comment>;
+  nextCursor?: Maybe<Scalars['String']['output']>;
 };
 
-export type CommentPage = {
-  __typename?: 'CommentPage';
-  content: Array<Comment>;
-  number: Scalars['Int']['output'];
-  size: Scalars['Int']['output'];
-  totalElements: Scalars['Int']['output'];
-  /**  Đổi page -> number */
-  totalPages: Scalars['Int']['output'];
+export type CommentQueryInput = {
+  cursor?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type CreateLessonInput = {
@@ -74,6 +70,12 @@ export type CreateQuestionInput = {
   isPublic?: Scalars['Boolean']['input'];
   thumbnailUrl?: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
+};
+
+export type EnumOption = {
+  __typename?: 'EnumOption';
+  code: Scalars['String']['output'];
+  displayName: Scalars['String']['output'];
 };
 
 export type FeedItem = {
@@ -134,7 +136,7 @@ export type Knowledge = {
   allowComment: Scalars['Boolean']['output'];
   category?: Maybe<Category>;
   commentCount: Scalars['Int']['output'];
-  comments?: Maybe<CommentPage>;
+  comments: CommentCursorPaging;
   createdAt?: Maybe<Scalars['String']['output']>;
   currentUserVote?: Maybe<Scalars['Int']['output']>;
   id: Scalars['ID']['output'];
@@ -149,7 +151,16 @@ export type Knowledge = {
 
 
 export type KnowledgeCommentsArgs = {
-  input?: InputMaybe<CommentGetInput>;
+  input?: InputMaybe<CommentQueryInput>;
+};
+
+export type KnowledgePagePayload = {
+  __typename?: 'KnowledgePagePayload';
+  content: Array<Knowledge>;
+  number: Scalars['Int']['output'];
+  size: Scalars['Int']['output'];
+  totalElements: Scalars['Int']['output'];
+  totalPages: Scalars['Int']['output'];
 };
 
 export type KnowledgeType =
@@ -162,7 +173,7 @@ export type Lesson = Knowledge & {
   allowComment: Scalars['Boolean']['output'];
   category?: Maybe<Category>;
   commentCount: Scalars['Int']['output'];
-  comments?: Maybe<CommentPage>;
+  comments: CommentCursorPaging;
   contentMarkdown?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['String']['output']>;
   currentUserVote?: Maybe<Scalars['Int']['output']>;
@@ -180,7 +191,7 @@ export type Lesson = Knowledge & {
 
 
 export type LessonCommentsArgs = {
-  input?: InputMaybe<CommentGetInput>;
+  input?: InputMaybe<CommentQueryInput>;
 };
 
 export type LessonFeedMeta = {
@@ -224,11 +235,22 @@ export type MutationUpdateQuestionArgs = {
   input: UpdateQuestionInput;
 };
 
+export type MyKnowledgeFilterInput = {
+  number?: InputMaybe<Scalars['Int']['input']>;
+  size?: InputMaybe<Scalars['Int']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   _empty?: Maybe<Scalars['String']['output']>;
+  categories: Array<Category>;
   getFeed: FeedPage;
   knowledge?: Maybe<Knowledge>;
+  lessonLevels: Array<EnumOption>;
+  listCommentReplies: Array<Comment>;
+  listRootComments: CommentCursorPaging;
+  myKnowledgeList: KnowledgePagePayload;
   searchFeed: FeedSearchResult;
 };
 
@@ -243,6 +265,23 @@ export type QueryKnowledgeArgs = {
 };
 
 
+export type QueryListCommentRepliesArgs = {
+  knowledgeId: Scalars['ID']['input'];
+  rootCommentId: Scalars['ID']['input'];
+};
+
+
+export type QueryListRootCommentsArgs = {
+  input?: InputMaybe<CommentQueryInput>;
+  knowledgeId: Scalars['ID']['input'];
+};
+
+
+export type QueryMyKnowledgeListArgs = {
+  input?: InputMaybe<MyKnowledgeFilterInput>;
+};
+
+
 export type QuerySearchFeedArgs = {
   input: FeedSearchInput;
 };
@@ -254,7 +293,7 @@ export type Question = Knowledge & {
   allowComment: Scalars['Boolean']['output'];
   category?: Maybe<Category>;
   commentCount: Scalars['Int']['output'];
-  comments?: Maybe<CommentPage>;
+  comments: CommentCursorPaging;
   content?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['String']['output']>;
   currentUserVote?: Maybe<Scalars['Int']['output']>;
@@ -271,7 +310,7 @@ export type Question = Knowledge & {
 
 
 export type QuestionCommentsArgs = {
-  input?: InputMaybe<CommentGetInput>;
+  input?: InputMaybe<CommentQueryInput>;
 };
 
 export type QuestionFeedMeta = {
@@ -313,10 +352,32 @@ export type UserSimple = {
   username?: Maybe<Scalars['String']['output']>;
 };
 
-export type CommentGetInput = {
-  number?: number | null | undefined;
-  size?: number | null | undefined;
-  sort?: string | null | undefined;
+export type CommentQueryInput = {
+  cursor?: string | null | undefined;
+  limit?: number | null | undefined;
+};
+
+export type CreateLessonInput = {
+  abstractText?: string | null | undefined;
+  allowComment?: boolean;
+  categoryId?: string | number | null | undefined;
+  contentMarkdown?: string | null | undefined;
+  estimateTimeInMinutes?: number | null | undefined;
+  isPreview?: boolean;
+  isPublic?: boolean;
+  level?: LessonLevel | null | undefined;
+  thumbnailUrl?: string | null | undefined;
+  title: string;
+};
+
+export type CreateQuestionInput = {
+  abstractText?: string | null | undefined;
+  allowComment?: boolean;
+  categoryId?: string | number | null | undefined;
+  content?: string | null | undefined;
+  isPublic?: boolean;
+  thumbnailUrl?: string | null | undefined;
+  title: string;
 };
 
 export type FeedQueryInput = {
@@ -343,6 +404,37 @@ export type LessonLevel =
   | 'BEGINNER'
   | 'INTERMEDIATE';
 
+export type MyKnowledgeFilterInput = {
+  number?: number | null | undefined;
+  size?: number | null | undefined;
+  sort?: string | null | undefined;
+};
+
+export type UpdateLessonInput = {
+  abstractText?: string | null | undefined;
+  allowComment?: boolean | null | undefined;
+  categoryId?: string | number | null | undefined;
+  contentMarkdown?: string | null | undefined;
+  estimateTimeInMinutes?: number | null | undefined;
+  id: string | number;
+  isPublic?: boolean | null | undefined;
+  level?: LessonLevel | null | undefined;
+  thumbnailUrl?: string | null | undefined;
+  title?: string | null | undefined;
+};
+
+export type UpdateQuestionInput = {
+  abstractText?: string | null | undefined;
+  allowComment?: boolean | null | undefined;
+  categoryId?: string | number | null | undefined;
+  content?: string | null | undefined;
+  id: string | number;
+  isPublic?: boolean | null | undefined;
+  isResolved?: boolean | null | undefined;
+  thumbnailUrl?: string | null | undefined;
+  title?: string | null | undefined;
+};
+
 export type GetFeedQueryVariables = Exact<{
   input?: FeedQueryInput | null | undefined;
 }>;
@@ -365,11 +457,80 @@ export type SearchFeedQuery = { searchFeed: { totalCount: number, totalPages: nu
 
 export type GetKnowledgeDetailQueryVariables = Exact<{
   id: string | number;
-  commentInput?: CommentGetInput | null | undefined;
+  commentInput?: CommentQueryInput | null | undefined;
 }>;
 
 
 export type GetKnowledgeDetailQuery = { knowledge:
-    | { __typename: 'Lesson', contentMarkdown: string | null, estimateTimeInMinutes: number | null, level: LessonLevel | null, id: string, title: string, type: KnowledgeType, abstractText: string | null, thumbnailUrl: string | null, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null, currentUserVote: number | null, category: { id: string, name: string } | null, owner: { id: string, username: string | null, avatarUrl: string | null }, comments: { totalElements: number, totalPages: number, number: number, size: number, content: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, rootCommentId: string | null, replyToCommentId: string | null, replyToUserName: string | null, replyCount: number, createdAt: string, updatedAt: string | null }> } | null }
-    | { __typename: 'Question', content: string | null, isResolved: boolean, acceptedAnswerId: string | null, id: string, title: string, type: KnowledgeType, abstractText: string | null, thumbnailUrl: string | null, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null, currentUserVote: number | null, category: { id: string, name: string } | null, owner: { id: string, username: string | null, avatarUrl: string | null }, comments: { totalElements: number, totalPages: number, number: number, size: number, content: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, rootCommentId: string | null, replyToCommentId: string | null, replyToUserName: string | null, replyCount: number, createdAt: string, updatedAt: string | null }> } | null }
+    | { __typename: 'Lesson', contentMarkdown: string | null, estimateTimeInMinutes: number | null, level: LessonLevel | null, id: string, title: string, type: KnowledgeType, abstractText: string | null, thumbnailUrl: string | null, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null, currentUserVote: number | null, category: { id: string, name: string } | null, owner: { id: string, username: string | null, avatarUrl: string | null }, comments: { hasMore: boolean, nextCursor: string | null, items: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, rootCommentId: string | null, replyToCommentId: string | null, replyToUserName: string | null, replyCount: number, createdAt: string, updatedAt: string | null }> } }
+    | { __typename: 'Question', content: string | null, isResolved: boolean, acceptedAnswerId: string | null, id: string, title: string, type: KnowledgeType, abstractText: string | null, thumbnailUrl: string | null, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null, currentUserVote: number | null, category: { id: string, name: string } | null, owner: { id: string, username: string | null, avatarUrl: string | null }, comments: { hasMore: boolean, nextCursor: string | null, items: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, rootCommentId: string | null, replyToCommentId: string | null, replyToUserName: string | null, replyCount: number, createdAt: string, updatedAt: string | null }> } }
    | null };
+
+export type ListRootCommentsQueryVariables = Exact<{
+  knowledgeId: string | number;
+  input?: CommentQueryInput | null | undefined;
+}>;
+
+
+export type ListRootCommentsQuery = { listRootComments: { hasMore: boolean, nextCursor: string | null, items: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, replyCount: number, createdAt: string }> } };
+
+export type ListCommentRepliesQueryVariables = Exact<{
+  knowledgeId: string | number;
+  rootCommentId: string | number;
+}>;
+
+
+export type ListCommentRepliesQuery = { listCommentReplies: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, rootCommentId: string | null, replyToCommentId: string | null, replyToUserName: string | null, replyCount: number, createdAt: string, updatedAt: string | null, deletedAt: string | null, deletedBy: string | null }> };
+
+export type CreateLessonMutationVariables = Exact<{
+  input: CreateLessonInput;
+}>;
+
+
+export type CreateLessonMutation = { createLesson: { id: string, type: KnowledgeType, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, allowComment: boolean, contentMarkdown: string | null, level: LessonLevel | null, estimateTimeInMinutes: number | null, createdAt: string | null, viewsCount: number, voteScore: number, commentCount: number, currentUserVote: number | null, owner: { id: string }, category: { id: string, name: string } | null } };
+
+export type CreateQuestionMutationVariables = Exact<{
+  input: CreateQuestionInput;
+}>;
+
+
+export type CreateQuestionMutation = { createQuestion: { id: string, type: KnowledgeType, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, allowComment: boolean, content: string | null, isResolved: boolean, acceptedAnswerId: string | null, createdAt: string | null, viewsCount: number, voteScore: number, commentCount: number, currentUserVote: number | null, owner: { id: string }, category: { id: string, name: string } | null } };
+
+export type GetMyKnowledgeListQueryVariables = Exact<{
+  input?: MyKnowledgeFilterInput | null | undefined;
+}>;
+
+
+export type GetMyKnowledgeListQuery = { myKnowledgeList: { totalElements: number, totalPages: number, number: number, size: number, content: Array<
+      | { level: LessonLevel | null, estimateTimeInMinutes: number | null, id: string, type: KnowledgeType, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null }
+      | { isResolved: boolean, content: string | null, id: string, type: KnowledgeType, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null }
+    > } };
+
+export type GetKnowledgeQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type GetKnowledgeQuery = { knowledge:
+    | { contentMarkdown: string | null, level: LessonLevel | null, estimateTimeInMinutes: number | null, id: string, type: KnowledgeType, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, allowComment: boolean, category: { id: string } | null }
+    | { content: string | null, isResolved: boolean, id: string, type: KnowledgeType, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, allowComment: boolean, category: { id: string } | null }
+   | null };
+
+export type UpdateQuestionMutationVariables = Exact<{
+  input: UpdateQuestionInput;
+}>;
+
+
+export type UpdateQuestionMutation = { updateQuestion: { id: string, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, allowComment: boolean, content: string | null, isResolved: boolean, category: { id: string } | null } };
+
+export type UpdateLessonMutationVariables = Exact<{
+  input: UpdateLessonInput;
+}>;
+
+
+export type UpdateLessonMutation = { updateLesson: { id: string, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, allowComment: boolean, contentMarkdown: string | null, level: LessonLevel | null, estimateTimeInMinutes: number | null, category: { id: string } | null } };
+
+export type GetReferenceDataQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetReferenceDataQuery = { lessonLevels: Array<{ code: string, displayName: string }>, categories: Array<{ id: string, name: string }> };

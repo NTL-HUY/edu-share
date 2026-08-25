@@ -1,7 +1,9 @@
 package com.nbh.edushare.modules.knowledge;
 
+import com.nbh.edushare.common.utils.CursorPaging;
 import com.nbh.edushare.modules.auth.security.AuthenticatedUser;
 import com.nbh.edushare.modules.interaction.InteractionService;
+import com.nbh.edushare.modules.interaction.dto.request.CommentQueryInput;
 import com.nbh.edushare.modules.interaction.dto.request.PageSearchInput;
 import com.nbh.edushare.modules.interaction.dto.request.VoteValueProjection;
 import com.nbh.edushare.modules.interaction.dto.response.CommentResponse;
@@ -9,7 +11,9 @@ import com.nbh.edushare.modules.knowledge.dto.command.CreateLessonCommand;
 import com.nbh.edushare.modules.knowledge.dto.command.CreateQuestionCommand;
 import com.nbh.edushare.modules.knowledge.dto.command.UpdateLessonCommand;
 import com.nbh.edushare.modules.knowledge.dto.command.UpdateQuestionCommand;
+import com.nbh.edushare.modules.knowledge.dto.request.KnowledgeFilterInput;
 import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeDetailResponse;
+import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeManageProjection;
 import com.nbh.edushare.modules.knowledge.dto.response.LessonDetailResponse;
 import com.nbh.edushare.modules.knowledge.dto.response.QuestionDetailResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +22,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
@@ -60,15 +65,14 @@ public class KnowledgeGraphQLController {
     }
 
     @SchemaMapping(typeName = "Knowledge", field = "comments")
-    public Page<CommentResponse> comments(
+    public CursorPaging<CommentResponse> comments(
             KnowledgeDetailResponse knowledge,
-            @Argument PageSearchInput input
+            @Argument CommentQueryInput input
     ) {
         Long knowledgeId = knowledge.getId();
-
         return interactionService.listRootComments(
                 knowledgeId,
-                input.toPageable()
+                input
         );
     }
 
@@ -83,4 +87,14 @@ public class KnowledgeGraphQLController {
                 .map(VoteValueProjection::getValue)
                 .orElse((short) 0);
     }
+
+    @QueryMapping
+    @PreAuthorize("isAuthenticated()")
+    public Page<KnowledgeDetailResponse> myKnowledgeList(
+            @Argument KnowledgeFilterInput input,
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        return knowledgeService.getMyKnowledgeList(currentUserId, input);
+    }
+
 }

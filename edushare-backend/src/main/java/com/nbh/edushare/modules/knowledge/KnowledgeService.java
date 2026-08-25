@@ -1,10 +1,9 @@
 package com.nbh.edushare.modules.knowledge;
 
 import com.nbh.edushare.modules.knowledge.dto.command.*;
-import com.nbh.edushare.modules.knowledge.dto.response.CourseDetailResponse;
-import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeDetailResponse;
-import com.nbh.edushare.modules.knowledge.dto.response.LessonDetailResponse;
-import com.nbh.edushare.modules.knowledge.dto.response.QuestionDetailResponse;
+import com.nbh.edushare.modules.knowledge.dto.request.KnowledgeFilterInput;
+import com.nbh.edushare.modules.knowledge.dto.response.*;
+import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,4 +17,6 @@ public interface KnowledgeService {
     int adjustCounters(Long id, int views, int votes, int comments);
 
     KnowledgeDetailResponse findById(Long knowledgeId);
+
+    Page<KnowledgeDetailResponse> getMyKnowledgeList(Long userId, KnowledgeFilterInput filter);
 }

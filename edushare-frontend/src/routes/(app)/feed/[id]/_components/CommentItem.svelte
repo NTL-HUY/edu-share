@@ -5,15 +5,16 @@
 		comment: any;
 		ownerUsername?: string | null;
 		onReply: (comment: { id: number; userName: string }) => void;
+		replyState?: { items: any[]; isLoading: boolean; isExpanded: boolean; isLoaded: boolean };
+		onToggleReplies?: (commentId: number) => void;
 	};
-	let { comment, ownerUsername, onReply }: Props = $props();
-		
+	let { comment, ownerUsername, onReply, replyState, onToggleReplies }: Props = $props();
 </script>
 
-<div class={comment.rootCommentId ? 'ml-8 pt-3' : 'pt-4'}>
-	<div class={comment.rootCommentId ? 'rounded-r-lg border-l-2 border-orange-300 bg-gray-50/60 p-3' : 'space-y-2'}>
-		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-2">
+<div class={comment.rootCommentId ? 'ml-8 pt-2' : 'pt-3'}>
+	<div class={comment.rootCommentId ? 'rounded-r-lg border-l-2 border-orange-300 bg-gray-50/60 p-2.5' : 'space-y-1'}>
+		<div class="flex items-center justify-start gap-x-4">
+			<div class="flex flex-wrap items-center gap-1.5">
 				<img
 					src={comment.userAvatarUrl ?? `https://ui-avatars.com/api/?name=${comment.userName}&background=0D8ABC&color=fff`}
 					alt="{comment.userName}'s avatar"
@@ -41,16 +42,22 @@
 			</button>
 		</div>
 
-		<p class="mt-1 text-xs leading-relaxed break-words whitespace-pre-wrap text-gray-700">
+		<p class="text-xs leading-snug break-words whitespace-pre-wrap text-gray-700">
 			{comment.content}
 		</p>
 
 		{#if comment.replyCount > 0 && !comment.rootCommentId}
-			<div class="pt-1">
-				<button type="button" class="text-[11px] font-semibold text-orange-600 hover:underline">
-					Xem {comment.replyCount} câu trả lời
-				</button>
-			</div>
+			<button type="button" onclick={() => onToggleReplies?.(comment.id)} class="text-[11px] font-semibold text-orange-600 hover:underline">
+				{replyState?.isLoading ? 'Đang tải...' : replyState?.isExpanded ? 'Ẩn' : `Xem ${comment.replyCount} câu trả lời`}
+			</button>
+
+			{#if replyState?.isExpanded}
+				<div class="mt-2 space-y-2">
+					{#each replyState.items as reply (reply.id)}
+						<svelte:self comment={reply} {ownerUsername} {onReply} />
+					{/each}
+				</div>
+			{/if}
 		{/if}
 	</div>
 </div>

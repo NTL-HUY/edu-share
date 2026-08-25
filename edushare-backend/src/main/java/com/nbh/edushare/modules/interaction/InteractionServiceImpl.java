@@ -1,10 +1,12 @@
 package com.nbh.edushare.modules.interaction;
 
 import com.nbh.edushare.common.exception.AppException;
+import com.nbh.edushare.common.utils.CursorPaging;
+import com.nbh.edushare.common.utils.CursorPair;
 import com.nbh.edushare.modules.feed.FeedService;
 import com.nbh.edushare.modules.feed.dto.request.FeedItemProjection;
 import com.nbh.edushare.modules.feed.dto.response.FeedCountProjection;
-import com.nbh.edushare.modules.interaction.counter.CounterService;
+import com.nbh.edushare.modules.interaction.dto.request.CommentQueryInput;
 import com.nbh.edushare.modules.interaction.dto.request.CreateCommentRequest;
 import com.nbh.edushare.modules.interaction.dto.request.VoteRequest;
 import com.nbh.edushare.modules.interaction.dto.response.CommentResponse;
@@ -18,8 +20,6 @@ import com.nbh.edushare.modules.interaction.pojo.Comment;
 import com.nbh.edushare.modules.interaction.pojo.Vote;
 import com.nbh.edushare.modules.interaction.repository.CommentRepository;
 import com.nbh.edushare.modules.interaction.repository.VoteRepository;
-import com.nbh.edushare.modules.knowledge.KnowledgeService;
-import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeDetailResponse;
 import com.nbh.edushare.modules.knowledge.exception.KnowledgeErrorCode;
 import com.nbh.edushare.modules.user.UserService;
 import com.nbh.edushare.modules.user.dto.response.UserAuthInfo;
@@ -29,6 +29,7 @@ import com.nbh.edushare.modules.user.exception.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,6 +110,40 @@ public class InteractionServiceImpl implements InteractionService {
         return commentRepository
                 .findRootCommentsForFeed(knowledgeId, pageable)
                 .map(commentMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CursorPaging<CommentResponse> listRootComments(Long knowledgeId, CommentQueryInput commentQueryInput) {
+        CursorPair cursorPair = CursorPair.decode(commentQueryInput.cursor());
+
+        LocalDateTime createdAt = cursorPair != null ? cursorPair.createdAt() : null;
+        Long id = cursorPair != null ? cursorPair.id() : null;
+
+        int limit = commentQueryInput.getSafeLimit();
+        Pageable pageable = PageRequest.of(0, limit + 1);
+
+        List<Comment> comments = commentRepository.findRootCommentsForFeed(
+                knowledgeId,
+                createdAt,
+                id,
+                pageable
+        );
+        boolean hasMore = comments.size() > limit;
+        List<Comment> pageItems = hasMore ? comments.subList(0, limit) : comments;
+
+        String nextCursor = hasMore
+                ? new CursorPair(
+                pageItems.getLast().getCreatedAt(),
+                pageItems.getLast().getId()
+        ).encode()
+                : null;
+
+        List<CommentResponse> items = pageItems.stream()
+                .map(commentMapper::toResponse)
+                .toList();
+
+        return CursorPaging.of(items, nextCursor, hasMore);
     }
 
     @Override

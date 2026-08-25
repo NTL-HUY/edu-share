@@ -1,7 +1,7 @@
 <!-- src/routes/feed/[id]/_components/VoteSidebar.svelte -->
 <script lang="ts">
 	import { ChevronUp, ChevronDown } from 'lucide-svelte';
-	import toast from 'svelte-french-toast';
+	import { toast } from 'svelte-sonner';
 
 	let { feedId, initialScore = 0, initialVote = 0 }: { feedId: string; initialScore?: number; initialVote?: number } = $props();
 

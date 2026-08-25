@@ -22,7 +22,12 @@ public interface UserService {
     List<Long> findNormalFolloweeIds(Long userId);
 
 
-    ProfileResponse getProfile(String username);
-    ProfileResponse updateProfile(Long currentUserId,  UpdateProfileRequest request);
+//    ProfileResponse getProfile(String username);
+
+    ProfileResponse getMyProfile(Long currentUserId);
+
+    ProfileResponse getProfileByUsername(String targetUsername, Long currentUserId);
+
+    ProfileResponse updateProfile(Long currentUserId, UpdateProfileRequest request);
 }
 

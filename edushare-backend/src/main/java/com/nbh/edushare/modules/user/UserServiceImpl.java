@@ -5,6 +5,7 @@ import com.nbh.edushare.modules.user.dto.command.CreateUserCommand;
 import com.nbh.edushare.modules.user.dto.request.UpdateProfileRequest;
 import com.nbh.edushare.modules.user.dto.response.ProfileResponse;
 import com.nbh.edushare.modules.user.dto.response.UserAuthInfo;
+import com.nbh.edushare.modules.user.dto.response.UserProfileResponse;
 import com.nbh.edushare.modules.user.dto.response.UserSimpleResponse;
 import com.nbh.edushare.modules.user.enums.UserRole;
 import com.nbh.edushare.modules.user.exception.UserErrorCode;
@@ -109,21 +110,58 @@ class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public ProfileResponse getProfile(String username) {
-        Profile profile = profileRepository.findByUsername(username)
+    public ProfileResponse getMyProfile(Long currentUserId) {
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+        Profile profile = profileRepository.findByUserId(currentUserId)
                 .orElseThrow(() -> new AppException(UserErrorCode.PROFILE_NOT_FOUND));
-        return userMapper.toProfileResponse(profile);
+
+        return userMapper.toProfileResponse(user, profile, true,false);
     }
 
     @Override
-    @Transactional
-    public ProfileResponse updateProfile(Long currentUserId, UpdateProfileRequest request) {
-        Profile profile = profileRepository.findById(currentUserId)
+    @Transactional(readOnly = true)
+    public ProfileResponse getProfileByUsername(String targetUsername, Long currentUserId) {
+        User targetUser = userRepository.findByUsernameOrEmail(targetUsername,User.class)
+                .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+        Profile profile = profileRepository.findByUserId(targetUser.getId())
                 .orElseThrow(() -> new AppException(UserErrorCode.PROFILE_NOT_FOUND));
 
+        boolean isMe = currentUserId != null && currentUserId.equals(targetUser.getId());
+        boolean isFollowing = false;
+
+        if (currentUserId != null && !isMe) {
+            isFollowing = followRepository.existsByFollowerIdAndFolloweeId(currentUserId, targetUser.getId());
+        }
+        return userMapper.toProfileResponse(targetUser, profile, isMe, isFollowing);
+    }
+
+//    @Override
+//    @Transactional
+//    public ProfileResponse updateProfile(Long currentUserId, UpdateProfileRequest request) {
+//        Profile profile = profileRepository.findById(currentUserId)
+//                .orElseThrow(() -> new AppException(UserErrorCode.PROFILE_NOT_FOUND));
+//
+//        userMapper.updateProfileFromRequest(request, profile);
+//
+//        return userMapper.toProfileResponse(profile);
+//    }
+
+    @Transactional
+    @Override
+    public ProfileResponse updateProfile(Long userId, UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+        Profile profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(UserErrorCode.PROFILE_NOT_FOUND));
+
+        userMapper.updateUserFromRequest(request, user);
         userMapper.updateProfileFromRequest(request, profile);
 
-        return userMapper.toProfileResponse(profile);
+        return userMapper.toProfileResponse(user, profile, true, false);
     }
 
 }

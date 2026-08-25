@@ -1,0 +1,26 @@
+# Environment variables (chứa mật khẩu/API key)
+.env
+*.env
+
+# IDE & Editor settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python Cache & Virtual Environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# Node / Frontend build artifacts (nếu có)
+node_modules/
+.next/
+dist/
+build/
+
+pretrained_models/

@@ -17,20 +17,19 @@ type Comment {
     deletedBy: ID
 }
 
-type CommentPage {
-    content: [Comment!]!
-    totalElements: Int!
-    number: Int!          # Đổi page -> number
-    totalPages: Int!
-    size: Int!
-}
-input CommentGetInput {
-    number: Int
-    size: Int
-    sort: String
+input CommentQueryInput {
+    cursor: String
+    limit: Int
 }
 
-#extend type Query {
-#    getRootComment(input: FeedQueryInput): FeedPage!
-#}
+type CommentCursorPaging {
+    items: [Comment!]!
+    nextCursor: String
+    hasMore: Boolean!
+}
+
+extend type Query {
+    listRootComments(knowledgeId: ID!, input: CommentQueryInput): CommentCursorPaging!
+    listCommentReplies(knowledgeId: ID!, rootCommentId: ID!): [Comment!]!
+}
 

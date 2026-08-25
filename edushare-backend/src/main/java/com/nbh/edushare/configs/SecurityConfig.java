@@ -38,6 +38,8 @@ public class SecurityConfig {
                         s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/me/profile").authenticated()   // thêm dòng này TRƯỚC
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me/profile").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/users/{username}/profile").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/{username}/followers").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/{username}/following").permitAll()

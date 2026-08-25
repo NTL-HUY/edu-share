@@ -15,7 +15,7 @@ export const load: PageServerLoad = async (event): Promise<FeedPageData> => {
    try {
       const data = await sdk.GetKnowledgeDetail({
          id,
-         commentInput: { number: 0, size: 10, sort: 'createdAt,desc' }
+         commentInput: {cursor: null, limit: 2 }
       });
 
       if (!data.knowledge) {
@@ -32,6 +32,7 @@ export const load: PageServerLoad = async (event): Promise<FeedPageData> => {
    } catch (err: any) {
       const gqlError = err?.response?.errors?.[0] || err?.errors?.[0];
       const message = gqlError?.message || 'Không thể kết nối đến máy chủ';
+      console.error("PageServerLoad: " , err)
 
       return {
          knowledge: null,

@@ -1,5 +1,4 @@
-@reference "../../../app.css";
-
+@reference "$lib/styles/app.css";
 .filter-bar {
   @apply mb-4 flex flex-wrap items-center justify-between gap-4;
 }

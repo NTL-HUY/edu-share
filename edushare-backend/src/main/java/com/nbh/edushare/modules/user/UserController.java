@@ -19,10 +19,10 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/{username}/profile")
-    public ResponseEntity<ProfileResponse> getProfile(@PathVariable String username) {
-        return ResponseEntity.ok(userService.getProfile(username));
-    }
+//    @GetMapping("/{username}/profile")
+//    public ResponseEntity<ProfileResponse> getProfile(@PathVariable String username) {
+//        return ResponseEntity.ok(userService.getProfile(username));
+//    }
 
     @GetMapping("/me")
     public ResponseEntity<UserBaseProjection> getMe(@AuthenticationPrincipal Long userId) {
@@ -37,5 +37,21 @@ public class UserController {
             @Valid @RequestBody UpdateProfileRequest request
     ) {
         return ResponseEntity.ok(userService.updateProfile(userId, request));
+    }
+
+
+    @GetMapping("/me/profile")
+    public ResponseEntity<ProfileResponse> getMyProfile(
+            @AuthenticationPrincipal Long userId) {
+        ProfileResponse response = userService.getMyProfile(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{username}/profile")
+    public ResponseEntity<ProfileResponse> getProfileByUsername(
+            @PathVariable String username,
+            @AuthenticationPrincipal Long userId) {
+        ProfileResponse response = userService.getProfileByUsername(username, userId != null ? userId : null);
+        return ResponseEntity.ok(response);
     }
 }
