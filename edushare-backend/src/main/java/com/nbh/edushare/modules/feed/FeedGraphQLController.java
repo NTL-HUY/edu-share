@@ -22,7 +22,7 @@ public class FeedGraphQLController {
     private final FeedMapper feedMapper;
 
     @QueryMapping
-    @PreAuthorize("isAuthenticated()")
+//    @PreAuthorize("isAuthenticated()")
     public FeedPage getFeed(@Argument FeedQueryInput input,
                             @AuthenticationPrincipal Long userId
     ) {

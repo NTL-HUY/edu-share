@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -20,22 +22,22 @@ public class FollowController {
 
     // 1. Follow a user
     @PostMapping("/{username}/follow")
-    public ResponseEntity<String> followUser(
+    public ResponseEntity<Object> followUser(
             @PathVariable String username,
             @AuthenticationPrincipal Long userId
     ) {
         followService.followUser(userId, username);
-        return ResponseEntity.ok("Follow thành công");
+        return ResponseEntity.ok(Map.of("message", "Follow thành công"));
     }
 
     // 2. Unfollow a user
     @DeleteMapping("/{username}/follow")
-    public ResponseEntity<String> unfollowUser(
+    public ResponseEntity<Object> unfollowUser(
             @PathVariable String username,
             @AuthenticationPrincipal Long userId
     ) {
         followService.unfollowUser(userId, username);
-        return ResponseEntity.ok("Unfollow thành công");
+        return ResponseEntity.ok(Map.of("message", "Unfollow thành công"));
     }
 
     // 3. Check status (đang follow hay chưa)

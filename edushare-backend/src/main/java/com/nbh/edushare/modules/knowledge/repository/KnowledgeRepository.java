@@ -36,4 +36,12 @@ public interface KnowledgeRepository extends JpaRepository<Knowledge, Long> {
                        @Param("comments") int comments);
 
     Page<Knowledge> findByOwnerIdAndDeletedAtIsNull(Long ownerId, Pageable pageable);
+
+    @Query("SELECT k FROM Knowledge k " +
+            "LEFT JOIN FETCH k.category " +
+            "LEFT JOIN FETCH k.owner " +
+            "WHERE k.owner.username = :username " +
+            "AND k.deletedAt IS NULL " +
+            "AND k.isPublic = true")
+    Page<Knowledge> findPublicByOwnerUsernameAndDeletedAtIsNull(@Param("username") String username, Pageable pageable);
 }

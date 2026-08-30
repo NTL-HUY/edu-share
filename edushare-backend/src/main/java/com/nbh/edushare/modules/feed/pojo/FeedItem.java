@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class FeedItem implements FeedCountProjection {
+public class FeedItem {
 
     @Id
     @Column(name = "knowledge_id")

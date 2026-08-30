@@ -1,6 +1,7 @@
 package com.nbh.edushare.modules.knowledge.publisher;
 
 import com.nbh.edushare.modules.knowledge.config.KnowledgeKafkaConfig;
+import com.nbh.edushare.modules.knowledge.event.KnowledgeDeletedEvent;
 import com.nbh.edushare.modules.knowledge.event.create.KnowledgeCreatedEvent;
 import com.nbh.edushare.modules.knowledge.event.update.KnowledgeUpdatedEvent;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,22 @@ public class KnowledgeKafkaPublisher {
                 log.error("Gửi Kafka thất bại cho knowledgeId={}", event.knowledgeId(), ex);
             } else {
                 log.info("Đã gửi Kafka knowledge-updated: knowledgeId={}", event.knowledgeId());
+            }
+        });
+    }
+
+    @Async("kafkaPublisherExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onKnowledgeDeleted(KnowledgeDeletedEvent event) {
+        kafkaTemplate.send(
+                KnowledgeKafkaConfig.KNOWLEDGE_DELETED_TOPIC,
+                event.knowledgeId().toString(),
+                event
+        ).whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("Gửi Kafka thất bại cho knowledgeId={}", event.knowledgeId(), ex);
+            } else {
+                log.info("Đã gửi Kafka knowledge-deleted: knowledgeId={}", event.knowledgeId());
             }
         });
     }

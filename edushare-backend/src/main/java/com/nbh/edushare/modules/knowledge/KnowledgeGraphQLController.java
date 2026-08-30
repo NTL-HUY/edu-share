@@ -1,10 +1,8 @@
 package com.nbh.edushare.modules.knowledge;
 
 import com.nbh.edushare.common.utils.CursorPaging;
-import com.nbh.edushare.modules.auth.security.AuthenticatedUser;
 import com.nbh.edushare.modules.interaction.InteractionService;
 import com.nbh.edushare.modules.interaction.dto.request.CommentQueryInput;
-import com.nbh.edushare.modules.interaction.dto.request.PageSearchInput;
 import com.nbh.edushare.modules.interaction.dto.request.VoteValueProjection;
 import com.nbh.edushare.modules.interaction.dto.response.CommentResponse;
 import com.nbh.edushare.modules.knowledge.dto.command.CreateLessonCommand;
@@ -13,7 +11,6 @@ import com.nbh.edushare.modules.knowledge.dto.command.UpdateLessonCommand;
 import com.nbh.edushare.modules.knowledge.dto.command.UpdateQuestionCommand;
 import com.nbh.edushare.modules.knowledge.dto.request.KnowledgeFilterInput;
 import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeDetailResponse;
-import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeManageProjection;
 import com.nbh.edushare.modules.knowledge.dto.response.LessonDetailResponse;
 import com.nbh.edushare.modules.knowledge.dto.response.QuestionDetailResponse;
 import lombok.RequiredArgsConstructor;
@@ -60,8 +57,8 @@ public class KnowledgeGraphQLController {
     }
 
     @QueryMapping
-    public KnowledgeDetailResponse knowledge(@Argument Long id, @AuthenticationPrincipal Long userId) {
-        return knowledgeService.getKnowledgeDetailForView(id, userId);
+    public KnowledgeDetailResponse knowledge(@Argument Long id, @AuthenticationPrincipal Long currentUserId) {
+        return knowledgeService.getKnowledgeDetailForView(id, currentUserId);
     }
 
     @SchemaMapping(typeName = "Knowledge", field = "comments")
@@ -97,4 +94,21 @@ public class KnowledgeGraphQLController {
         return knowledgeService.getMyKnowledgeList(currentUserId, input);
     }
 
+    @QueryMapping
+    public Page<KnowledgeDetailResponse> knowledgeListByUsername(
+            @Argument String username,
+            @Argument KnowledgeFilterInput input
+    ) {
+        return knowledgeService.getKnowledgeListByUsername(username, input);
+    }
+
+    @MutationMapping
+    @PreAuthorize("isAuthenticated()")
+    public Boolean deleteKnowledge(
+            @Argument Long id,
+            @AuthenticationPrincipal Long currentUserId
+    ) {
+        knowledgeService.deleteKnowledge(id,currentUserId);
+        return true;
+    }
 }

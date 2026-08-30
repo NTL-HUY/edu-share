@@ -77,10 +77,67 @@ CREATE TABLE IF NOT EXISTS vote (
 CREATE INDEX idx_vote_user_knowledge
     ON vote (user_id, knowledge_id);
 
---
--- CREATE TABLE IF NOT EXISTS knowledge_statistics (
---     knowledge_id  BIGINT PRIMARY KEY REFERENCES knowledge (id) ON DELETE CASCADE,
---     views_count   BIGINT NOT NULL DEFAULT 0,
---     created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
---     updated_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
--- );
+
+
+-- =====================================================
+-- CHAT: community group chat (room cố định, seed sẵn, nhiều thành viên)
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS chat_room (
+    id BIGSERIAL PRIMARY KEY,
+--     category_id BIGINT REFERENCES category(id),
+    name VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+--     avatar_url VARCHAR(500),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,  -- admin có thể tắt room mà không cần xóa
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =====================================================
+-- room_member: trạng thái của user đối với 1 room
+-- (đã join hay chưa + con trỏ đã đọc tới đâu, dùng để tính unread badge)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS room_read_state (
+    id BIGSERIAL PRIMARY KEY,
+    room_id BIGINT NOT NULL REFERENCES chat_room(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    last_read_message_id BIGINT NULL,
+    last_visited_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_room_read_state_room_user UNIQUE (room_id, user_id)
+);
+
+CREATE INDEX idx_room_read_state_user ON room_read_state (user_id);
+
+
+-- =====================================================
+-- chat_message: tin nhắn trong room, có reply (không nested, chỉ trỏ thẳng 1 cấp)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS chat_message (
+    id BIGSERIAL PRIMARY KEY,
+    room_id BIGINT NOT NULL REFERENCES chat_room(id) ON DELETE CASCADE,
+
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    user_name VARCHAR(100) NOT NULL,     -- denormalize, tránh join lúc render list
+    user_avatar_url VARCHAR(255),
+
+    reply_to_message_id BIGINT REFERENCES chat_message(id) ON DELETE SET NULL,
+    reply_to_user_name VARCHAR(100),               -- snapshot, phòng tin gốc bị xóa
+    reply_to_content_preview VARCHAR(200),             -- snapshot ngắn nội dung tin gốc
+
+    content TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    deleted_by BIGINT REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Phân trang tin nhắn theo room, mới nhất trước (giống pattern feed_item)
+CREATE INDEX idx_chat_message_room_created
+    ON chat_message (room_id, id DESC)
+    WHERE deleted_at IS NULL;
+
+-- Tính unread badge: COUNT(*) WHERE room_id=? AND id > last_read_message_id
+-- Index trên đã đủ phục vụ query dạng room_id + id range, không cần thêm index riêng.

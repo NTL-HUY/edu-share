@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/feed/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/feed/*/comments/*/replies").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/feed/*/views").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/chat").permitAll()
                         .requestMatchers("/graphql", "/graphiql/**").permitAll()
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

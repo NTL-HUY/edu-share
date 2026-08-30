@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum KnowledgeErrorCode implements ErrorCode {
     KNOWLEDGE_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "Bài đăng kiến thức này không tồn tại"),
-
+    KNOWLEDGE_ALREADY_DELETED(HttpStatus.BAD_REQUEST.value(), "Bài đăng này đã bị xóa"),
     KNOWLEDGE_ACCESS_DENIED(HttpStatus.FORBIDDEN.value(), "Bạn không có quyền thao tác trên nội dung này"),
 
     ;

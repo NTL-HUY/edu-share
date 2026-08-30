@@ -14,9 +14,14 @@ public interface KnowledgeService {
     KnowledgeDetailResponse getKnowledgeDetailForView(Long id, Long currentUserId);
     LessonDetailResponse updateLesson(UpdateLessonCommand command, Long currentUserId);
     QuestionDetailResponse updateQuestion(UpdateQuestionCommand command, Long currentUserId);
+
+    void deleteKnowledge(Long knowledgeId, Long currentUserId);
+
     int adjustCounters(Long id, int views, int votes, int comments);
 
     KnowledgeDetailResponse findById(Long knowledgeId);
 
     Page<KnowledgeDetailResponse> getMyKnowledgeList(Long userId, KnowledgeFilterInput filter);
+
+    Page<KnowledgeDetailResponse> getKnowledgeListByUsername(String username, KnowledgeFilterInput filter);
 }

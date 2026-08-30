@@ -13,52 +13,64 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FeedItemRepository extends JpaRepository<FeedItem, Long>, JpaSpecificationExecutor<FeedItem> {
+
+    //    Public feed theo owners (famous / normal followee)
     @Query("""
-        SELECT fi FROM FeedItem fi 
-        WHERE fi.ownerId IN :ownerIds 
-        ORDER BY fi.sourceCreatedAt DESC, fi.knowledgeId DESC
-    """)
-    List<FeedItem> findLatestByOwners(
+                SELECT fi FROM FeedItem fi
+                WHERE fi.ownerId IN :ownerIds
+                  AND fi.isPublic = true
+                  AND fi.deletedAt IS NULL
+                ORDER BY fi.sourceCreatedAt DESC, fi.knowledgeId DESC
+            """)
+    List<FeedItem> findLatestPublicByOwners(
             @Param("ownerIds") List<Long> ownerIds,
             Pageable pageable
     );
 
     @Query("""
-        SELECT fi FROM FeedItem fi 
-        WHERE fi.ownerId IN :ownerIds 
-          AND (
-            fi.sourceCreatedAt < :createdAt 
-            OR (fi.sourceCreatedAt = :createdAt AND fi.knowledgeId < :id)
-          )
-        ORDER BY fi.sourceCreatedAt DESC, fi.knowledgeId DESC
-    """)
-    List<FeedItem> findOlderByOwners(
+                SELECT fi FROM FeedItem fi
+                WHERE fi.ownerId IN :ownerIds
+                  AND fi.isPublic = true
+                  AND fi.deletedAt IS NULL
+                  AND (
+                    fi.sourceCreatedAt < :createdAt
+                    OR (fi.sourceCreatedAt = :createdAt AND fi.knowledgeId < :id)
+                  )
+                ORDER BY fi.sourceCreatedAt DESC, fi.knowledgeId DESC
+            """)
+    List<FeedItem> findOlderPublicByOwners(
             @Param("ownerIds") List<Long> ownerIds,
             @Param("createdAt") LocalDateTime createdAt,
             @Param("id") Long id,
             Pageable pageable
     );
 
+    // ================== Discovery (public, loại trừ các id đã có trong pool) ==================
+
     @Query("""
-        SELECT fi FROM FeedItem fi 
-        WHERE fi.knowledgeId NOT IN :excludeIds 
-        ORDER BY fi.sourceCreatedAt DESC, fi.knowledgeId DESC
-    """)
-    List<FeedItem> findLastestDiscovery(
+                SELECT fi FROM FeedItem fi
+                WHERE fi.knowledgeId NOT IN :excludeIds
+                  AND fi.isPublic = true
+                  AND fi.deletedAt IS NULL
+                ORDER BY fi.sourceCreatedAt DESC, fi.knowledgeId DESC
+            """)
+    List<FeedItem> findLatestPublicDiscovery(
             @Param("excludeIds") List<Long> excludeIds,
             Pageable pageable
     );
 
     @Query("""
-        SELECT fi FROM FeedItem fi 
-        WHERE fi.knowledgeId NOT IN :excludeIds 
-          AND (
-            fi.sourceCreatedAt < :createdAt 
-            OR (fi.sourceCreatedAt = :createdAt AND fi.knowledgeId < :id)
-          )
-        ORDER BY fi.sourceCreatedAt DESC, fi.knowledgeId DESC
-    """)
-    List<FeedItem> findOlderDiscovery(
+                SELECT fi FROM FeedItem fi
+                WHERE fi.knowledgeId NOT IN :excludeIds
+                  AND fi.isPublic = true
+                  AND fi.deletedAt IS NULL
+                  AND (
+                    fi.sourceCreatedAt < :createdAt
+                    OR (fi.sourceCreatedAt = :createdAt AND fi.knowledgeId < :id)
+                  )
+                ORDER BY fi.sourceCreatedAt DESC, fi.knowledgeId DESC
+            """)
+    List<FeedItem> findOlderPublicDiscovery(
             @Param("excludeIds") List<Long> excludeIds,
             @Param("createdAt") LocalDateTime createdAt,
             @Param("id") Long id,
@@ -67,16 +79,22 @@ public interface FeedItemRepository extends JpaRepository<FeedItem, Long>, JpaSp
 
     @Modifying
     @Query(value = """
-    UPDATE feed_item
-    SET views_count = views_count + :views,
-        vote_score = vote_score + :votes,
-        comment_count = comment_count + :comments
-    WHERE knowledge_id = :id
-    """, nativeQuery = true)
+            UPDATE feed_item
+            SET views_count = views_count + :views,
+                vote_score = vote_score + :votes,
+                comment_count = comment_count + :comments
+            WHERE knowledge_id = :id
+            """, nativeQuery = true)
     int adjustCounters(@Param("id") long id, @Param("views") int views,
-                        @Param("votes") int votes, @Param("comments") int comments);
+                       @Param("votes") int votes, @Param("comments") int comments);
 
-    <T> Optional<T> findProjectedByKnowledgeId(Long knowledgeId, Class<T> type);
+
+    <T> Optional<T> findProjectedByKnowledgeIdAndDeletedAtIsNull(Long knowledgeId, Class<T> type);
+
 
     boolean existsByKnowledgeId(Long knowledgeId);
+
+    @Modifying
+    @Query("UPDATE FeedItem fi SET fi.deletedAt = :deletedAt WHERE fi.knowledgeId = :knowledgeId AND fi.deletedAt IS NULL")
+    int markDeleted(@Param("knowledgeId") Long knowledgeId, @Param("deletedAt") LocalDateTime deletedAt);
 }

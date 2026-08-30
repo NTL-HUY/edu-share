@@ -74,3 +74,9 @@ app:
       lock-timeout-seconds: 10
   feed:
     cache-ttl-seconds: ${FEED_CACHE_TTL_SECONDS:30}
+    discovery-cache-ttl-seconds: ${DISCOVERY_FEED_CACHE_TTL_SECONDS:30}
+
+chatbot:
+  python-service:
+    base-url: ${PYTHON_RAG_URL:http://localhost:8000}
+    timeout: 30s

@@ -141,9 +141,11 @@ extend type Mutation {
     createQuestion(input: CreateQuestionInput!): Question!
     updateLesson(input: UpdateLessonInput!): Lesson!
     updateQuestion(input: UpdateQuestionInput!): Question!
+    deleteKnowledge(id: ID!): Boolean!
 }
 
 extend type Query {
     knowledge(id: ID!): Knowledge
     myKnowledgeList(input: MyKnowledgeFilterInput): KnowledgePagePayload!
+    knowledgeListByUsername(username: String!, input: MyKnowledgeFilterInput): KnowledgePagePayload!
 }

@@ -33,30 +33,14 @@ class FeedServiceImpl implements FeedService {
     @Value("${app.feed.cache-ttl-seconds:30}")
     private long feedCacheTtlSeconds;
 
-    private final FeedMapper feedMapper;
+    @Value("${app.feed.discovery-cache-ttl-seconds:60}")
+    private long discoveryCacheTtlSeconds;
+
+//    private final FeedMapper feedMapper;
     private final FeedItemRepository  feedItemRepository;
     private final UserFeedRepository userFeedRepository;
     private final UserService userService;
     private final RedisTemplate<String, Object> redisTemplate;
-
-
-    @Override
-    @Transactional
-    public FeedItem processKnowledgeCreated(KnowledgeCreatedEvent event) {
-        FeedItem feedItem = feedMapper.toEntity(event);
-        return feedItemRepository.save(feedItem);
-    }
-
-    @Override
-    @Transactional
-    public FeedItem processKnowledgeUpdated(KnowledgeUpdatedEvent event) {
-        FeedItem feedItem = feedItemRepository.findById(event.knowledgeId())
-                .orElseThrow(() -> new IllegalStateException(
-                        "FeedItem not found for knowledgeId=" + event.knowledgeId()));
-
-        feedMapper.updateEntity(feedItem, event);
-        return feedItemRepository.save(feedItem);
-    }
 
     @Override
     public FeedSearchResult searchFeed(FeedSearchInput input, Pageable pageable) {
@@ -72,100 +56,79 @@ class FeedServiceImpl implements FeedService {
         return feedItemRepository.adjustCounters(id, views, votes, comments);
     }
 
-    @Transactional
-    @Override
-    public void fanOutToFollowers(long ownerId, long knowledgeId) {
-        List<Long> followerIds = userService.getFollowerIds(ownerId);
 
-        LocalDateTime now = LocalDateTime.now();
-
-        List<UserFeed> userFeeds = followerIds.stream()
-                .map(followerId -> new UserFeed(followerId, knowledgeId, now))
-                .toList();
-
-        userFeedRepository.saveAll(userFeeds);
-    }
 
     @Transactional(readOnly = true)
     @Override
     public <T> Optional<T> findProjectedById(Long id, Class<T> type){
-        return feedItemRepository.findProjectedByKnowledgeId(id, type);
+        return feedItemRepository.findProjectedByKnowledgeIdAndDeletedAtIsNull(id, type);
     };
-
-    private String buildFeedCacheKey(Long userId, String cursorStr, int limit) {
-        return "feed:user:%d:%s:%d".formatted(userId, cursorStr == null ? "first" : cursorStr, limit);
-    }
 
     @Transactional(readOnly = true)
     @Override
     public FeedPage getFeed(Long userId, String cursorStr, int limit){
-        String cacheKey = buildFeedCacheKey(userId, cursorStr, limit);
+        if (userId == null) {
+            return getDiscoveryFeed(cursorStr, limit);
+        }
 
-        // 1. Check cache trước
+        String cacheKey = buildFeedCacheKey(userId, cursorStr, limit);
         FeedPage cached = (FeedPage) redisTemplate.opsForValue().get(cacheKey);
         if (cached != null) {
             return cached;
         }
 
         FeedCursor cursor = FeedCursor.decode(cursorStr);
-        Pageable pageable = PageRequest.of(0, limit);
+        int effectiveLimit = limit + 1;
+        Pageable pageable = PageRequest.of(0, effectiveLimit);
 
-        // pushed
+        Map<Long, FeedItem> pool = new LinkedHashMap<>();
+
+        // 1. Pushed (đã lọc public/owner ở repo)
         List<FeedItem> pushed = (cursor == null)
                 ? userFeedRepository.findPushedFeedFirstPage(userId, pageable)
                 : userFeedRepository.findPushedFeed(userId, cursor.createdAt(), cursor.id(), pageable);
+        putAll(pool, pushed);
 
-        // Famous
+        // 2. Famous - chỉ public
         List<Long> famousIds = userService.findFamousFolloweeIds(userId);
-        List<FeedItem> kolFeed = famousIds.isEmpty() ? List.of()
-                : (cursor == null
-                   ? feedItemRepository.findLatestByOwners(famousIds, pageable)
-                   : feedItemRepository.findOlderByOwners(famousIds, cursor.createdAt(), cursor.id(), pageable));
-
-        Map<Long, FeedItem> primaryFeedMap = new LinkedHashMap<>();
-        for (FeedItem item : pushed) {
-            primaryFeedMap.put(item.getKnowledgeId(), item);
+        if (!famousIds.isEmpty()) {
+            List<FeedItem> kolFeed = (cursor == null)
+                    ? feedItemRepository.findLatestPublicByOwners(famousIds, pageable)
+                    : feedItemRepository.findOlderPublicByOwners(famousIds, cursor.createdAt(), cursor.id(), pageable);
+            putAll(pool, kolFeed);
         }
-        for (FeedItem item : kolFeed) {
-            primaryFeedMap.putIfAbsent(item.getKnowledgeId(), item);
-        }
-        List<FeedItem> result = primaryFeedMap.values().stream()
-                .sorted(Comparator.comparing(FeedItem::getSourceCreatedAt).reversed())
-                .limit(limit)
-                .collect(Collectors.toList());
 
-        // Nguồn 3: fallback followee
-        int missing = limit - result.size();
-        if (missing > 0) {
+        // 3. Fallback followee thường - chỉ public, chỉ fetch khi vẫn còn thiếu
+        if (pool.size() < effectiveLimit) {
             List<Long> normalIds = userService.findNormalFolloweeIds(userId);
             if (!normalIds.isEmpty()) {
-                Pageable fallbackPageable = PageRequest.of(0, missing);
+                Pageable fallbackPageable = PageRequest.of(0, effectiveLimit - pool.size());
                 List<FeedItem> fallback = (cursor == null)
-                        ? feedItemRepository.findLatestByOwners(normalIds, fallbackPageable)
-                        : feedItemRepository.findOlderByOwners(normalIds, cursor.createdAt(), cursor.id(), fallbackPageable);
-                result.addAll(fallback);
+                        ? feedItemRepository.findLatestPublicByOwners(normalIds, fallbackPageable)
+                        : feedItemRepository.findOlderPublicByOwners(normalIds, cursor.createdAt(), cursor.id(), fallbackPageable);
+                putAll(pool, fallback);
             }
         }
 
-        //  discovery
-        missing = limit - result.size();
-        if (missing > 0) {
-            List<Long> excludeIds = result.stream().map(FeedItem::getKnowledgeId).toList();
-            List<Long> safeExclude = excludeIds.isEmpty() ? List.of(-1L) : excludeIds;
-
-            Pageable discoveryPageable = PageRequest.of(0, missing);
+        // 4. Discovery - chỉ public, chỉ fetch khi vẫn còn thiếu
+        if (pool.size() < effectiveLimit) {
+            List<Long> excludeIds = pool.isEmpty() ? List.of(-1L) : new ArrayList<>(pool.keySet());
+            Pageable discoveryPageable = PageRequest.of(0, effectiveLimit - pool.size());
             List<FeedItem> discovery = (cursor == null)
-                    ? feedItemRepository.findLastestDiscovery(safeExclude, discoveryPageable)
-                    : feedItemRepository.findOlderDiscovery(safeExclude, cursor.createdAt(), cursor.id(), discoveryPageable);
-            result.addAll(discovery);
+                    ? feedItemRepository.findLatestPublicDiscovery(excludeIds, discoveryPageable)
+                    : feedItemRepository.findOlderPublicDiscovery(excludeIds, cursor.createdAt(), cursor.id(), discoveryPageable);
+            putAll(pool, discovery);
         }
 
-        List<FeedItem> finalList = result.stream()
-                .sorted(Comparator.comparing(FeedItem::getSourceCreatedAt).reversed())
-                .limit(limit)
+        List<FeedItem> sorted = pool.values().stream()
+                .sorted(Comparator.comparing(FeedItem::getSourceCreatedAt)
+                        .thenComparing(FeedItem::getKnowledgeId)
+                        .reversed())
                 .toList();
 
-        boolean hasMore = finalList.size() == limit;
+        boolean hasMore = sorted.size() > limit;
+        List<FeedItem> finalList = hasMore ? sorted.subList(0, limit) : sorted;
+
         String nextCursor = finalList.isEmpty() ? null
                 : new FeedCursor(
                 finalList.getLast().getSourceCreatedAt(),
@@ -179,9 +142,53 @@ class FeedServiceImpl implements FeedService {
         return feedPage;
     }
 
+    private String buildFeedCacheKey(Long userId, String cursor, int limit) {
+        return String.format("feed:user:%d:cursor:%s:limit:%d", userId, cursor != null ? cursor : "null", limit);
+    }
+
+    private String buildDiscoveryCacheKey(String cursorStr, int limit) {
+        return "feed:discovery:%s:%d".formatted(cursorStr == null ? "first" : cursorStr, limit);
+    }
+
     @Override
     @Transactional(readOnly = true)
     public boolean existsByKnowledgeId(Long knowledgeId) {
         return feedItemRepository.existsByKnowledgeId(knowledgeId);
+    }
+
+    private FeedPage getDiscoveryFeed(String cursorStr, int limit) {
+        String cacheKey = buildDiscoveryCacheKey(cursorStr, limit);
+        FeedPage cached = (FeedPage) redisTemplate.opsForValue().get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
+        FeedCursor cursor = FeedCursor.decode(cursorStr);
+        Pageable pageable = PageRequest.of(0, limit + 1);
+
+        List<FeedItem> discovery = (cursor == null)
+                ? feedItemRepository.findLatestPublicDiscovery(List.of(-1L), pageable)
+                : feedItemRepository.findOlderPublicDiscovery(List.of(-1L), cursor.createdAt(), cursor.id(), pageable);
+
+        boolean hasMore = discovery.size() > limit;
+        List<FeedItem> finalList = hasMore ? discovery.subList(0, limit) : discovery;
+
+        String nextCursor = finalList.isEmpty() ? null
+                : new FeedCursor(
+                finalList.getLast().getSourceCreatedAt(),
+                finalList.getLast().getKnowledgeId()
+        ).encode();
+
+        FeedPage feedPage = new FeedPage(finalList, nextCursor, hasMore);
+
+        redisTemplate.opsForValue().set(cacheKey, feedPage, Duration.ofSeconds(discoveryCacheTtlSeconds));
+
+        return feedPage;
+    }
+
+    private void putAll(Map<Long, FeedItem> pool, List<FeedItem> items) {
+        for (FeedItem item : items) {
+            pool.putIfAbsent(item.getKnowledgeId(), item);
+        }
     }
 }

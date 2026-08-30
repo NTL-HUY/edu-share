@@ -5,7 +5,7 @@ import com.nbh.edushare.modules.knowledge.dto.command.UpdateLessonCommand;
 import com.nbh.edushare.modules.knowledge.dto.command.UpdateQuestionCommand;
 import com.nbh.edushare.modules.knowledge.dto.request.KnowledgeFilterInput;
 import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeDetailResponse;
-import com.nbh.edushare.modules.knowledge.dto.response.KnowledgeManageProjection;
+import com.nbh.edushare.modules.knowledge.event.KnowledgeDeletedEvent;
 import com.nbh.edushare.modules.knowledge.event.update.KnowledgeUpdatedEvent;
 import com.nbh.edushare.modules.knowledge.exception.CategoryErrorCode;
 import com.nbh.edushare.modules.knowledge.exception.KnowledgeErrorCode;
@@ -24,6 +24,8 @@ import com.nbh.edushare.modules.knowledge.repository.LessonRepository;
 import com.nbh.edushare.modules.knowledge.repository.QuestionRepository;
 import com.nbh.edushare.modules.user.UserService;
 import com.nbh.edushare.modules.user.dto.response.UserAuthInfo;
+import com.nbh.edushare.modules.user.dto.response.UserRoleProjection;
+import com.nbh.edushare.modules.user.enums.UserRole;
 import com.nbh.edushare.modules.user.exception.UserErrorCode;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
 @Service
@@ -86,10 +89,17 @@ class KnowledgeServiceImpl implements KnowledgeService {
         Knowledge knowledge = knowledgeRepository.findDetailById(id)
                 .orElseThrow(() -> new AppException(KnowledgeErrorCode.KNOWLEDGE_NOT_FOUND));
 
-        boolean isOwner = knowledge.getOwner().getId().equals(currentUserId);
+        if (knowledge.isDeleted()) {
+            throw new AppException(KnowledgeErrorCode.KNOWLEDGE_NOT_FOUND);
+        }
+
+        boolean isOwner = currentUserId != null
+                && knowledge.getOwner().getId().equals(currentUserId);
+
         if (!knowledge.getIsPublic() && !isOwner) {
             throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ACCESS_DENIED);
         }
+
         return builDetailResponse(knowledge);
     }
 
@@ -121,6 +131,37 @@ class KnowledgeServiceImpl implements KnowledgeService {
 
     @Override
     @Transactional
+    public void deleteKnowledge(Long knowledgeId, Long currentUserId) {
+        Knowledge entity = knowledgeRepository.findById(knowledgeId)
+                .orElseThrow(() -> new AppException(KnowledgeErrorCode.KNOWLEDGE_NOT_FOUND));
+
+        if (entity.isDeleted()) {
+            throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ALREADY_DELETED);
+        }
+
+        UserRoleProjection currentUser = userService.findProjectedById(currentUserId,UserRoleProjection.class)
+                .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+        boolean isOwner = entity.getOwner().getId().equals(currentUserId);
+        if(!isOwner && !currentUser.getUserRole().equals(UserRole.ADMIN)){
+            throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ACCESS_DENIED);
+        }
+
+        entity.setDeletedAt(LocalDateTime.now());
+        entity.setDeletedBy(entityManager.getReference(UserRef.class,currentUserId));
+        knowledgeRepository.save(entity);
+
+        eventPublisher.publishEvent(new KnowledgeDeletedEvent(
+                entity.getId(),
+                resolveType(entity),
+                entity.getOwner().getId(),
+                currentUserId
+        ));
+
+    }
+
+    @Override
+    @Transactional
     public int adjustCounters(Long id, int views, int votes, int comments) {
         return knowledgeRepository.adjustCounters(id, views, votes, comments);
     }
@@ -137,6 +178,15 @@ class KnowledgeServiceImpl implements KnowledgeService {
     @Transactional(readOnly = true)
     public Page<KnowledgeDetailResponse> getMyKnowledgeList(Long userId, KnowledgeFilterInput filter) {
         Page<Knowledge> page = knowledgeRepository.findByOwnerIdAndDeletedAtIsNull(userId, filter.toPageable());
+        return page.map(this::builDetailResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<KnowledgeDetailResponse> getKnowledgeListByUsername(String username, KnowledgeFilterInput filter) {
+        Page<Knowledge> page = knowledgeRepository.findPublicByOwnerUsernameAndDeletedAtIsNull(
+                username, filter.toPageable()
+        );
         return page.map(this::builDetailResponse);
     }
 
@@ -208,6 +258,14 @@ class KnowledgeServiceImpl implements KnowledgeService {
         return switch (response) {
             case Lesson lesson -> lessonMapper.toDetailResponse(lesson);
             case Question question -> questionMapper.toDetailResponse(question);
+            default -> throw new IllegalStateException("Unsupported knowledge type");
+        };
+    }
+
+    private String resolveType(Knowledge entity) {
+        return switch (entity) {
+            case Lesson ignored -> "LESSON";
+            case Question ignored -> "QUESTION";
             default -> throw new IllegalStateException("Unsupported knowledge type");
         };
     }
