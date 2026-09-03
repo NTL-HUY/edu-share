@@ -1,6 +1,7 @@
 package com.nbh.edushare.modules.chat;
 
 import com.nbh.edushare.modules.chat.dto.request.CursorPaginateRequest;
+import com.nbh.edushare.modules.chat.dto.request.IncomingChatMessage;
 import com.nbh.edushare.modules.chat.dto.request.SendMessageRequest;
 import com.nbh.edushare.modules.chat.dto.response.CursorPagingResponse;
 import com.nbh.edushare.modules.chat.pojo.ChatMessage;
@@ -19,6 +20,8 @@ public interface ChatService {
     Map<Long, Long> getUnreadCounts(Long userId);
 
     CursorPagingResponse<ChatMessage> getMessages(Long roomId, CursorPaginateRequest request);
+
+    void handleStompSendMessage(IncomingChatMessage payload, Long userId);
 
     List<ChatRoom> getChatRooms();
 }

@@ -71,17 +71,17 @@ class KnowledgeServiceImpl implements KnowledgeService {
         return questionMapper.toDetailResponse(saved);
     }
 
-    @Override
-    public KnowledgeDetailResponse getKnowledgeDetailForEdit(Long id, Long currentUserId) {
-        Knowledge knowledge = knowledgeRepository.findDetailById(id)
-                .orElseThrow(() -> new AppException(KnowledgeErrorCode.KNOWLEDGE_NOT_FOUND));
-
-        if (!knowledge.getOwner().getId().equals(currentUserId)) {
-            throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ACCESS_DENIED);
-        }
-
-        return builDetailResponse(knowledge);
-    }
+//    @Override
+//    public KnowledgeDetailResponse getKnowledgeDetailForEdit(Long id, Long currentUserId) {
+//        Knowledge knowledge = knowledgeRepository.findDetailById(id)
+//                .orElseThrow(() -> new AppException(KnowledgeErrorCode.KNOWLEDGE_NOT_FOUND));
+//
+//        if (!knowledge.getOwner().getId().equals(currentUserId)) {
+//            throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ACCESS_DENIED);
+//        }
+//
+//        return builDetailResponse(knowledge);
+//    }
 
     @Override
     @Transactional(readOnly = true)

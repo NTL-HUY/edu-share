@@ -1,8 +1,7 @@
-import { createSdk } from '$lib/graphql/client';
 import { interactionService } from '$lib/services/interaction.service';
 import type { CreateCommentRequest } from '$lib/types/interaction';
 import { apiError, apiSuccess } from '$lib/utils/apiResponse';
-import { json, type RequestHandler } from '@sveltejs/kit';
+import { type RequestHandler } from '@sveltejs/kit';
 
 export const PUT: RequestHandler = async ({ params, request, fetch }) => {
    const feedId = params.id;

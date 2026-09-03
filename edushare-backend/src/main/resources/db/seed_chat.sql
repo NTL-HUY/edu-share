@@ -18,15 +18,15 @@ WHERE NOT EXISTS (
 -- =====================================================
 -- CHAT_MESSAGE: 2 tin đầu cho room "Thảo luận chung"
 -- =====================================================
-INSERT INTO chat_message (room_id, user_id, user_name, content)
-SELECT r.id, u.id, u.username, 'Chào mọi người!'
+INSERT INTO chat_message (room_id, user_id, user_name, content, client_temp_id)
+SELECT r.id, u.id, u.username, 'Chào mọi người!', gen_random_uuid()::text
 FROM chat_room r, users u
 WHERE r.name = 'Thảo luận chung'
   AND u.username = 'admin'
   AND NOT EXISTS (SELECT 1 FROM chat_message m WHERE m.room_id = r.id);
 
-INSERT INTO chat_message (room_id, user_id, user_name, content)
-SELECT r.id, u.id, u.username, 'Room này để bàn chuyện gì vậy?'
+INSERT INTO chat_message (room_id, user_id, user_name, content, client_temp_id)
+SELECT r.id, u.id, u.username, 'Room này để bàn chuyện gì vậy?', gen_random_uuid()::text
 FROM chat_room r, users u
 WHERE r.name = 'Thảo luận chung'
   AND u.username = 'user1'
@@ -35,13 +35,12 @@ WHERE r.name = 'Thảo luận chung'
       WHERE m.room_id = r.id AND m.content = 'Room này để bàn chuyện gì vậy?'
   );
 
--- tin reply, tự tra id của tin "Room này để bàn chuyện gì vậy?" vừa insert ở trên
 INSERT INTO chat_message (
     room_id, user_id, user_name, content,
-    reply_to_message_id, reply_to_user_name, reply_to_content_preview
+    reply_to_message_id, reply_to_user_name, reply_to_content_preview, client_temp_id
 )
 SELECT r.id, u.id, u.username, 'Bàn chuyện chung thôi bạn ơi',
-       m.id, m.user_name, m.content
+       m.id, m.user_name, m.content, gen_random_uuid()::text
 FROM chat_room r
 JOIN users u ON u.username = 'admin'
 JOIN chat_message m ON m.room_id = r.id AND m.content = 'Room này để bàn chuyện gì vậy?'
@@ -51,11 +50,8 @@ WHERE r.name = 'Thảo luận chung'
       WHERE x.room_id = r.id AND x.reply_to_message_id = m.id
   );
 
--- =====================================================
--- CHAT_MESSAGE: room "Hỏi đáp Toán"
--- =====================================================
-INSERT INTO chat_message (room_id, user_id, user_name, content)
-SELECT r.id, u.id, u.username, 'Ai giải giúp mình bài đạo hàm này với'
+INSERT INTO chat_message (room_id, user_id, user_name, content, client_temp_id)
+SELECT r.id, u.id, u.username, 'Ai giải giúp mình bài đạo hàm này với', gen_random_uuid()::text
 FROM chat_room r, users u
 WHERE r.name = 'Hỏi đáp Toán'
   AND u.username = 'user2'

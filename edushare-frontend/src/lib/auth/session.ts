@@ -3,13 +3,14 @@ import type { Cookies } from '@sveltejs/kit';
 import type { AuthTokenResponse } from '$lib/types/auth.types';
 import type { UserBaseProjection } from '$lib/types/user';
 import { SessionCookieNames } from '$lib/constants/session';
+import { dev } from '$app/environment';
 
 
 const baseCookieOpts = {
   path: '/',
   httpOnly: true,
-  secure: true,
-  sameSite: 'strict' as const
+  secure: !dev,
+  sameSite: dev ? ('lax' as const) : ('strict' as const)
 };
 
 const calculateMaxAge = (expiresIn: number) => {

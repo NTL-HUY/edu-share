@@ -1,9 +1,9 @@
-import { API_ENDPOINTS } from "$lib/configs/api";
-import type { CreateCommentRequest } from "$lib/types/interaction";
-import { apiRequest } from "./base.service";
+import { API_ENDPOINTS } from '$lib/configs/api';
+import type { CreateCommentRequest } from '$lib/types/interaction';
+import { apiRequest } from './base.service';
 
 export type VoteRequest = {
-  value: number;
+	value: number;
 };
 
 export const interactionService = {
@@ -20,5 +20,15 @@ export const interactionService = {
 		apiRequest<void>(fetchFn, API_ENDPOINTS.INTERACTION.CREATE_COMMENT(feedId), {
 			method: 'POST',
 			body: payload
+		}),
+
+	follow: (fetchFn: typeof fetch, username: string) =>
+		apiRequest<void>(fetchFn, API_ENDPOINTS.USER.FOLLOW(username), {
+			method: 'POST'
+		}),
+
+	unfollow: (fetchFn: typeof fetch, username: string) =>
+		apiRequest<void>(fetchFn, API_ENDPOINTS.USER.UNFOLLOW(username), {
+			method: 'DELETE'
 		})
 };

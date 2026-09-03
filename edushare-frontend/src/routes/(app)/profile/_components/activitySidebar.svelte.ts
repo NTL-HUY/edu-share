@@ -1,14 +1,10 @@
 export type ActivitySubTab =
-  | 'summary'
   | 'knowledge'
-  | 'comments'
-  | 'votes'
   | 'followers'
   | 'following'
-  | 'ai_chunks';
 
 export class ActivitySidebarState {
-  activeSubTab = $state<ActivitySubTab>('summary');
+  activeSubTab = $state<ActivitySubTab>('knowledge');
 
   // Đếm số lượng items cho từng tab (có thể update linh hoạt sau này)
   counts = $state({

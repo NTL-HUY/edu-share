@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 
 public record SendMessageRequest(
         @NotBlank @Size(max = 5000) String content,
-        Long replyToMessageId
+        Long replyToMessageId,
+        String clientTempId
 ) {
 }

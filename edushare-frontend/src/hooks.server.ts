@@ -25,7 +25,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	const isBackendRequest = request.url.startsWith(PUBLIC_API_BASE_URL) || request.url.startsWith(PUBLIC_GRAPHQL_URL);
-
 	if (!isBackendRequest) {
 		return fetch(request);
 	}

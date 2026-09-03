@@ -3,6 +3,37 @@ import { GraphQLClient, type RequestOptions } from 'graphql-request';
 import gql from 'graphql-tag';
 type GraphQLClientRequestHeaders = RequestOptions['requestHeaders'];
 
+export const RoomsDocument = gql`
+    query Rooms {
+  rooms {
+    id
+    name
+    description
+    unreadCount
+  }
+}
+    `;
+export const MessagesDocument = gql`
+    query Messages($roomId: ID!, $request: CursorPaginateRequest!) {
+  messages(roomId: $roomId, request: $request) {
+    beforeId
+    hasMore
+    items {
+      id
+      roomId
+      userId
+      userName
+      userAvatarUrl
+      content
+      replyToMessageId
+      replyToUserName
+      replyToContentPreview
+      createdAt
+      clientTempId
+    }
+  }
+}
+    `;
 export const GetFeedDocument = gql`
     query GetFeed($input: FeedQueryInput) {
   getFeed(input: $input) {
@@ -316,6 +347,36 @@ export const UpdateLessonDocument = gql`
   }
 }
     `;
+export const KnowledgeListByUsernameDocument = gql`
+    query KnowledgeListByUsername($username: String!, $input: MyKnowledgeFilterInput) {
+  knowledgeListByUsername(username: $username, input: $input) {
+    totalElements
+    totalPages
+    number
+    size
+    content {
+      id
+      type
+      title
+      abstractText
+      thumbnailUrl
+      isPublic
+      viewsCount
+      voteScore
+      commentCount
+      createdAt
+      ... on Lesson {
+        level
+        estimateTimeInMinutes
+      }
+      ... on Question {
+        isResolved
+        content
+      }
+    }
+  }
+}
+    `;
 export const GetReferenceDataDocument = gql`
     query GetReferenceData {
   lessonLevels {
@@ -336,6 +397,12 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
+    Rooms(variables?: Types.RoomsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<Types.RoomsQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<Types.RoomsQuery>({ document: RoomsDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Rooms', 'query', variables);
+    },
+    Messages(variables: Types.MessagesQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<Types.MessagesQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<Types.MessagesQuery>({ document: MessagesDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'Messages', 'query', variables);
+    },
     GetFeed(variables?: Types.GetFeedQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<Types.GetFeedQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<Types.GetFeedQuery>({ document: GetFeedDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetFeed', 'query', variables);
     },
@@ -368,6 +435,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     UpdateLesson(variables: Types.UpdateLessonMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<Types.UpdateLessonMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<Types.UpdateLessonMutation>({ document: UpdateLessonDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdateLesson', 'mutation', variables);
+    },
+    KnowledgeListByUsername(variables: Types.KnowledgeListByUsernameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<Types.KnowledgeListByUsernameQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<Types.KnowledgeListByUsernameQuery>({ document: KnowledgeListByUsernameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'KnowledgeListByUsername', 'query', variables);
     },
     GetReferenceData(variables?: Types.GetReferenceDataQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<Types.GetReferenceDataQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<Types.GetReferenceDataQuery>({ document: GetReferenceDataDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'GetReferenceData', 'query', variables);

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface KnowledgeService {
     LessonDetailResponse createLesson(CreateLessonCommand command, Long ownerId);
     QuestionDetailResponse createQuestion(CreateQuestionCommand command, Long ownerId);
-    KnowledgeDetailResponse getKnowledgeDetailForEdit(Long id, Long currentUserId);
+//    KnowledgeDetailResponse getKnowledgeDetailForEdit(Long id, Long currentUserId);
     KnowledgeDetailResponse getKnowledgeDetailForView(Long id, Long currentUserId);
     LessonDetailResponse updateLesson(UpdateLessonCommand command, Long currentUserId);
     QuestionDetailResponse updateQuestion(UpdateQuestionCommand command, Long currentUserId);

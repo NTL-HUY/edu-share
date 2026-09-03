@@ -1,0 +1,29 @@
+query Rooms {
+    rooms {
+        id
+        name
+        description
+        unreadCount
+    }
+}
+
+
+query Messages ($roomId : ID!, $request: CursorPaginateRequest! ) {
+    messages(roomId: $roomId, request: $request) {
+        beforeId
+        hasMore
+        items {
+            id
+            roomId
+            userId
+            userName
+            userAvatarUrl
+            content
+            replyToMessageId
+            replyToUserName
+            replyToContentPreview
+            createdAt
+            clientTempId
+        }
+    }
+}

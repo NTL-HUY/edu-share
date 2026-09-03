@@ -1,24 +1,34 @@
-import type { GetMyKnowledgeListQuery } from '$lib/generated/types';
+import { type GetMyKnowledgeListQuery, type KnowledgeListByUsernameQuery } from '$lib/generated/types';
 import { getClientSdk } from '$lib/graphql/client';
 import { toast } from 'svelte-sonner';
 
-type KnowledgePagePayload = GetMyKnowledgeListQuery['myKnowledgeList'];
+type KnowledgePagePayload =
+	GetMyKnowledgeListQuery['myKnowledgeList'] | KnowledgeListByUsernameQuery['knowledgeListByUsername'];
 
-async function fetchPage(page: number): Promise<KnowledgePagePayload> {
-   console.log('fetchPage called with page =', page);
+async function fetchPage(userProfile: any, page: number): Promise<KnowledgePagePayload> {
 	const sdk = getClientSdk();
 
 	try {
-		const data = await sdk.GetMyKnowledgeList({
-			input: {
-				number : page,
-				size: 2
-			}
-		});
+		let data;
 
-		console.log(data);
-		return data.myKnowledgeList;
-
+		if (!userProfile.isMe) {
+			data = await sdk.KnowledgeListByUsername({
+				username: userProfile.username,
+				input: {
+					number: page,
+					size: 10
+				}
+			});
+			return data.knowledgeListByUsername;
+		} else {
+			data = await sdk.GetMyKnowledgeList({
+				input: {
+					number: page,
+					size: 10
+				}
+			});
+			return data.myKnowledgeList;
+		}
 	} catch (err: any) {
 		const graphQLError = err?.response?.errors?.[0];
 		const classification = graphQLError?.extensions?.classification;
@@ -46,15 +56,19 @@ export class KnowledgeListState {
 	totalElements = $state(0);
 	loading = $state(false);
 	error = $state<string | null>(null);
-
+	userProfile = $state(null);
 	hasMore = $derived(this.page + 1 < this.totalPages);
+
+	constructor(profile : any) {
+		this.userProfile = profile;
+	}
 
 	async load(reset = false) {
 		this.loading = true;
 		this.error = null;
 		const targetPage = reset ? 0 : this.page;
 		try {
-			const result = await fetchPage(targetPage);
+			const result = await fetchPage(this.userProfile, targetPage);
 			this.items = reset ? result.content : [...this.items, ...result.content];
 			this.page = result.number;
 			this.totalPages = result.totalPages;

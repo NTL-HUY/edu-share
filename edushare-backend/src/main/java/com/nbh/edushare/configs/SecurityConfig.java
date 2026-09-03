@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/feed/*/views").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/chat").permitAll()
                         .requestMatchers("/graphql", "/graphiql/**").permitAll()
+                        .requestMatchers("/ws-chat/**").permitAll()
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -60,7 +61,7 @@ public class SecurityConfig {
 
         // Cấp phép Origin từ Frontend SvelteKit
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-
+        configuration.setAllowedOriginPatterns(List.of("*"));
         // Cấp phép tất cả các Method HTTP
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 

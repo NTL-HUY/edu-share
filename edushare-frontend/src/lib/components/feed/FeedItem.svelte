@@ -6,7 +6,7 @@
 	import './feed-item.css';
 
 	let { feedItem }: { feedItem: FeedItem } = $props();
-   console.log('feedItem in FeedItem.svelte:', feedItem);
+   // console.log('feedItem in FeedItem.svelte:', feedItem);
 </script>
 
 <div class="feed-item">
@@ -66,17 +66,13 @@
 		<div class="footer">
 			<!-- Tags -->
 			<div class="tags-list">
-				<!-- {#each feedItem.tags as tag}
-						<a href={`/tags/${tag}`} class="tag-item">
-							{tag}
-						</a>
-					{/each} -->
+			
 			</div>
 
 			<!-- Author info -->
 			<div class="author-info">
 				<img src={`${feedItem.ownerAvatarUrl ?? `https://ui-avatars.com/api/?name=${feedItem.ownerName}`}`} alt={feedItem.ownerName} class="avatar" />
-				<a href={`/users/${feedItem.ownerName}`} class="author-name">{feedItem.ownerName}</a>
+				<a href={`/profile/${feedItem.ownerName}`} class="author-name">{feedItem.ownerName}</a>
 				<!-- <span class="reputation">{feedItem.ownerReputation}</span> -->
 				<span>Dang:{formatTimeAgo(feedItem.sourceCreatedAt)}</span>
 			</div>

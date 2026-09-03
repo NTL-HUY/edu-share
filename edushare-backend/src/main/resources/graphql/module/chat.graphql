@@ -18,6 +18,7 @@ type ChatMessage {
     replyToMessageId: ID
     replyToUserName: String
     replyToContentPreview: String
+    clientTempId : String!
     createdAt: String!
 }
 

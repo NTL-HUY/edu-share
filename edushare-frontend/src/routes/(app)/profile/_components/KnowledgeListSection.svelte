@@ -1,20 +1,15 @@
 <script lang="ts">
 	import { Search } from 'lucide-svelte';
 	import KnowledgeItemRow from './KnowledgeItemRow.svelte';
-	import { KnowledgeListState } from './knowledgeList.svelte';
+	import { KnowledgeListState } from './knowledgeList.svelte.ts';
 
-	// let { activeSubTab }: { activeSubTab: 'lessons' | 'questions' } = $props();
-
-	const list = new KnowledgeListState();
+	let { profile  }: { profile: any } = $props();
+	const list = $derived(new KnowledgeListState(profile));
 	let searchQuery = $state('');
 
-	const filteredItems = $derived(
-		list.items.filter((i) => i.title.toLowerCase().includes(searchQuery.toLowerCase()))
-	);
+	const filteredItems = $derived(list.items.filter((i) => i.title.toLowerCase().includes(searchQuery.toLowerCase())));
 
-	// load lại từ đầu khi đổi tab
 	$effect(() => {
-		// activeSubTab; 
 		list.load(true);
 	});
 
@@ -36,19 +31,14 @@
 	<h2 class="text-lg font-normal text-slate-800">
 		Có tổng cộng {list.totalElements} bài đăng
 	</h2>
-	<div class="relative w-64">
-		<Search class="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-		<input
-			type="text"
-			bind:value={searchQuery}
-			placeholder="Lọc tiêu đề..."
-			class="w-full rounded-md border border-slate-300 py-1.5 pr-3 pl-8 text-xs focus:border-orange-500 focus:outline-none" />
+	<div class="">
+		
 	</div>
 </div>
 
 <div class="divide-y divide-slate-100 rounded-md border border-slate-200 bg-white">
 	{#each filteredItems as item (item.id)}
-		<KnowledgeItemRow {item} onToggleVisibility={toggleVisibility} onDelete={deleteItem} />
+		<KnowledgeItemRow {item} onToggleVisibility={toggleVisibility} onDelete={deleteItem} isReadOnly={!profile.isMe} />
 	{:else}
 		{#if !list.loading}
 			<div class="p-6 text-center text-sm text-slate-400">Không có dữ liệu</div>

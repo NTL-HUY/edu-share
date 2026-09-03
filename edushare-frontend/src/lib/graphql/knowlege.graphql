@@ -145,3 +145,34 @@ mutation UpdateLesson($input: UpdateLessonInput!) {
 		}
 	}
 }
+
+query KnowledgeListByUsername($username: String!, $input: MyKnowledgeFilterInput) {
+    knowledgeListByUsername(username: $username, input: $input) {
+        totalElements
+        totalPages
+        number
+        size
+        content {
+            id
+            type
+            title
+            abstractText
+            thumbnailUrl
+            isPublic
+            viewsCount
+            voteScore
+            commentCount
+            createdAt
+            
+            ... on Lesson {
+                level
+                estimateTimeInMinutes
+            }
+            
+            ... on Question {
+                isResolved
+                content
+            }
+        }
+    }
+}

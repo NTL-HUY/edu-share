@@ -20,4 +20,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             @Param("beforeId") Long beforeId,
             Pageable pageable
     );
+
+//    boolean existsByIdAndRoomIdAndDeletedAtIsNull(Long id, Long roomId);
+    boolean existsByClientTempIdAndUserId(String clientTempId, Long userId);
 }

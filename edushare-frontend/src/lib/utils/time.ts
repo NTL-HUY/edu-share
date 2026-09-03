@@ -23,3 +23,13 @@ export function formatTimeAgo(isoString: string | null): string {
 
 	return date.toLocaleDateString('vi-VN');
 }
+
+export function formatTime(dateStr: string) {
+	if (!dateStr) return '';
+	const date = new Date(dateStr);
+	return date.toLocaleTimeString('en-US', {
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: true
+	});
+}

@@ -8,5 +8,6 @@ import java.util.Optional;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom,Long> {
     List<ChatRoom> findByIsActiveTrue();
+    boolean existsByIdAndIsActiveTrue(Long id);
     Optional<ChatRoom> findByIdAndIsActiveTrue( Long id);
 }

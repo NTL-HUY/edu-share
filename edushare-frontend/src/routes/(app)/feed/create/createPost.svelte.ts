@@ -47,6 +47,9 @@ export class CreatePostState {
 				return;
 			}
 
+			console.log('Loaded isPublic:', item.isPublic);
+			console.log('Form isPublic after assign:', this.isPublic);
+			console.log('Loaded allowComment:', item.allowComment);
 			// đổ dữ liệu chung
 			this.title = item.title;
 			this.categoryId = item.category?.id ?? '';

@@ -6,10 +6,11 @@
 	import LessonFormFields from './LessonFormFields.svelte';
 	import QuestionFormFields from './QuestionFormFields.svelte';
 	import type { CreatePostState } from '../create/createPost.svelte';
-
+	console.log('PostForm render');
 	let { form }: { form: CreatePostState } = $props();
-
 	const isEdit = $derived(form.editingId !== null);
+
+	$inspect(form);
 </script>
 
 <div class="text-slate-800">
@@ -18,7 +19,9 @@
 		<div>
 			<h1 class="page-header-title">{isEdit ? 'Chỉnh sửa nội dung' : 'Tạo nội dung mới'}</h1>
 			<p class="page-header-desc">
-				{isEdit ? 'Cập nhật lại bài học hoặc câu hỏi của bạn' : 'Chia sẻ kiến thức chuyên môn hoặc đặt câu hỏi cho cộng đồng'}
+				{isEdit
+					? 'Cập nhật lại bài học hoặc câu hỏi của bạn'
+					: 'Chia sẻ kiến thức chuyên môn hoặc đặt câu hỏi cho cộng đồng'}
 			</p>
 		</div>
 		<div class="filter-tabs-group">

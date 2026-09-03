@@ -118,7 +118,7 @@ CREATE INDEX idx_room_read_state_user ON room_read_state (user_id);
 CREATE TABLE IF NOT EXISTS chat_message (
     id BIGSERIAL PRIMARY KEY,
     room_id BIGINT NOT NULL REFERENCES chat_room(id) ON DELETE CASCADE,
-
+    client_temp_id VARCHAR(100) NOT NULL,
     user_id BIGINT NOT NULL REFERENCES users(id),
     user_name VARCHAR(100) NOT NULL,     -- denormalize, tránh join lúc render list
     user_avatar_url VARCHAR(255),
@@ -131,7 +131,9 @@ CREATE TABLE IF NOT EXISTS chat_message (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
-    deleted_by BIGINT REFERENCES users(id) ON DELETE SET NULL
+    deleted_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT uk_chat_message_client_temp_id_sender
+    UNIQUE (client_temp_id, user_id)
 );
 
 -- Phân trang tin nhắn theo room, mới nhất trước (giống pattern feed_item)

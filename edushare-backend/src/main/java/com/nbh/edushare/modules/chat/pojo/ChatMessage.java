@@ -24,6 +24,9 @@ public class ChatMessage extends SoftDeleteModel {
     @Column(name = "user_avatar_url", length = 255)
     private String userAvatarUrl;
 
+    @Column(name = "client_temp_id", nullable = false, length = 100)
+    private String clientTempId;
+
     // ===== reply
     @Column(name = "reply_to_message_id")
     private Long replyToMessageId;

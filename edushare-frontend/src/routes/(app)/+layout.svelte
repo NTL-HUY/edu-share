@@ -4,7 +4,23 @@
 	import Footer from '$lib/components/common/Footer.svelte';
    import { Toaster } from 'svelte-sonner';
    import '$lib/styles/app.css';
-	let { children } = $props();
+	import Chatbot from '$lib/components/chatbot/Chatbot.svelte';
+	import { stomp } from '$lib/configs/stomp.svelte.js';
+	import { onDestroy } from 'svelte';
+	let { data, children } = $props();
+
+	$effect(() => {
+		if (data.user) {
+			stomp.activate(); 
+		} else {
+			stomp.deactivate();
+		}
+	});
+
+	onDestroy(() => {
+		stomp.deactivate(); 
+	});
+
 </script>
 
 <Toaster position="top-right"/>
@@ -12,10 +28,13 @@
 <div class="flex min-h-screen flex-col">
 	<Header />
 	<div class="flex flex-1">
-		<Sidebar />
+		<Sidebar user={data.user}/>
 		<main class="flex-1 p-6 ">
 			{@render children()}
 		</main>
 	</div>
-	<Footer />
+	<!-- <Footer /> -->
 </div>
+
+
+<!-- <Chatbot /> -->

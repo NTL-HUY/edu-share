@@ -5,13 +5,16 @@
 	let {
 		item,
 		onToggleVisibility,
-		onDelete
+		onDelete,
+		isReadOnly
 	}: {
 		item: GetMyKnowledgeListQuery['myKnowledgeList']['content'][number];
 		onToggleVisibility: (id: string) => void;
 		onDelete: (id: string) => void;
+      isReadOnly: boolean
 	} = $props();
 
+   let readOnlyMode = $derived(isReadOnly);
 	const isLesson = $derived(item.type === 'LESSON');
 </script>
 
@@ -46,9 +49,7 @@
 				{/if}
 			</div>
 
-			<a
-				href="/feed/{item.id}/edit"
-				class="block truncate text-sm font-medium text-slate-800 hover:text-orange-600">
+			<a href="/feed/{item.id}" class="block truncate text-sm font-medium text-slate-800 hover:text-orange-600">
 				{item.title}
 			</a>
 
@@ -59,24 +60,26 @@
 		</div>
 	</div>
 
-	<div class="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
-		<button
-			onclick={() => onToggleVisibility(item.id)}
-			title={item.isPublic ? 'Đang công khai' : 'Đang riêng tư'}
-			class="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-			{#if item.isPublic}
-				<Globe class="h-4 w-4 text-emerald-600" />
-			{:else}
-				<Lock class="h-4 w-4" />
-			{/if}
-		</button>
-		<a href="/feed/{item.id}/edit" class="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-blue-600">
-			<Pencil class="h-4 w-4" />
-		</a>
-		<button
-			onclick={() => onDelete(item.id)}
-			class="rounded-md p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600">
-			<Trash2 class="h-4 w-4" />
-		</button>
-	</div>
+	{#if !readOnlyMode}
+		<div class="flex items-center gap-1 opacity-0 transition group-hover:opacity-100">
+			<button
+				onclick={() => onToggleVisibility(item.id)}
+				title={item.isPublic ? 'Đang công khai' : 'Đang riêng tư'}
+				class="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+				{#if item.isPublic}
+					<Globe class="h-4 w-4 text-emerald-600" />
+				{:else}
+					<Lock class="h-4 w-4" />
+				{/if}
+			</button>
+			<a href="/feed/{item.id}/edit" class="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-blue-600">
+				<Pencil class="h-4 w-4" />
+			</a>
+			<button
+				onclick={() => onDelete(item.id)}
+				class="rounded-md p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600">
+				<Trash2 class="h-4 w-4" />
+			</button>
+		</div>
+	{/if}
 </div>

@@ -11,7 +11,11 @@ export const API_ENDPOINTS = {
 		ME: `${PUBLIC_API_BASE_URL}/users/me`,
 		ME_PROFILE: `${PUBLIC_API_BASE_URL}/users/me/profile`,
 		UPDATE_PROFILE: `${PUBLIC_API_BASE_URL}/users/me/profile`,
-
+		FOLLOWERS: (username: string) => `${PUBLIC_API_BASE_URL}/users/${username}/followers`,
+		FOLLOWING: (username: string) => `${PUBLIC_API_BASE_URL}/users/${username}/following`,
+		USERNAME_PROFILE: (username: string) => `${PUBLIC_API_BASE_URL}/users/${username}/profile`,
+      FOLLOW: (username: string) => `${PUBLIC_API_BASE_URL}/users/${username}/follow`,
+      UNFOLLOW: (username: string) => `${PUBLIC_API_BASE_URL}/users/${username}/follow`
 	},
 	INTERACTION: {
 		VOTE: (feedId: string) => `${PUBLIC_API_BASE_URL}/feed/${feedId}/vote`,
@@ -23,5 +27,8 @@ export const API_ENDPOINTS = {
 	},
 	MEDIA: {
 		UPLOAD_IMAGE: `${PUBLIC_API_BASE_URL}/media/upload`
-	}
+	},
+   CHATBOT: {
+      CHAT: `${PUBLIC_API_BASE_URL}/chat`
+   }
 } as const;

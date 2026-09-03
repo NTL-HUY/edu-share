@@ -6,20 +6,17 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { authService } from '$lib/services/auth.service';
 	import { clearSessionCookies } from '$lib/auth/session';
-
-	// 1. Tự động lấy từ khóa từ URL (?q=...)
-	// Khi xóa bộ lọc trên URL -> urlQuery biến thành '' -> ô input tự động trống!
+	import { toast } from 'svelte-sonner';
+	let username = $derived(page.data.user?.username || '');
 	let urlQuery = $derived(page.url.searchParams.get('q') || '');
 
-	// 2. State nội bộ dùng để gõ bàn phím
 	let searchQuery = $state('');
 
-	// 3. Mỗi khi URL đổi (người dùng chuyển trang, xóa filter...), đồng bộ lại vào input
 	$effect(() => {
 		searchQuery = urlQuery;
 	});
 
-function handleSearch(e: SubmitEvent | KeyboardEvent) {
+	function handleSearch(e: SubmitEvent | KeyboardEvent) {
 		e.preventDefault();
 		const trimmed = searchQuery.trim();
 
@@ -33,19 +30,27 @@ function handleSearch(e: SubmitEvent | KeyboardEvent) {
 
 		// Ngược lại, đẩy query param mới lên URL
 		const newUrl = new URL(page.url);
-		newUrl.pathname = '/search'; 
+		newUrl.pathname = '/search';
 		newUrl.searchParams.set('q', trimmed);
 		goto(newUrl.toString());
 	}
 
 	async function handleLogout() {
 		try {
-			await authService.logout(fetch);
-         await fetch('/logout', { method: 'POST' });
-			await invalidateAll();
-			goto('/login');
+			const res = await fetch('/api/logout', { method: 'POST' });
+			const result = await res.json();
+
+			if (result.success) {
+				toast.success('Đăng xuất thành công!');
+			} else {
+				toast.error(result.message || 'Đăng xuất không hoàn tất trên server', { id: toastId });
+			}
 		} catch (error) {
-			console.error('Lỗi khi đăng xuất:', error);
+			console.error('Lỗi kết nối khi đăng xuất:', error);
+			toast.error('Lỗi kết nối tới máy chủ');
+		} finally {
+			await invalidateAll();
+			goto('/');
 		}
 	}
 </script>
@@ -70,9 +75,15 @@ function handleSearch(e: SubmitEvent | KeyboardEvent) {
 
 		<!-- Navigation Links -->
 		<nav class="hidden shrink-0 items-center gap-1 text-[13px] text-gray-600 md:flex">
-			<a href="/about" class="rounded-full px-3 py-1.5 transition-colors hover:bg-gray-100 hover:text-gray-900">About</a>
-			<a href="/products" class="rounded-full px-3 py-1.5 transition-colors hover:bg-gray-100 hover:text-gray-900">Products</a>
-			<a href="/internal" class="rounded-full px-3 py-1.5 transition-colors hover:bg-gray-100 hover:text-gray-900">Stack Internal</a>
+			<a href="/about" class="rounded-full px-3 py-1.5 transition-colors hover:bg-gray-100 hover:text-gray-900">
+				About
+			</a>
+			<a href="/products" class="rounded-full px-3 py-1.5 transition-colors hover:bg-gray-100 hover:text-gray-900">
+				Products
+			</a>
+			<a href="/internal" class="rounded-full px-3 py-1.5 transition-colors hover:bg-gray-100 hover:text-gray-900">
+				Stack Internal
+			</a>
 		</nav>
 
 		<!-- Search Input (Giữa, cân đối) -->
@@ -89,7 +100,7 @@ function handleSearch(e: SubmitEvent | KeyboardEvent) {
 		<div class="flex shrink-0 items-center gap-2">
 			{#if page.data.user}
 				<!-- Nếu người dùng đã đăng nhập, hiển thị thông tin người dùng -->
-				<a href="/profile" class="flex items-center gap-2">
+				<a href="/profile/{username}" class="flex items-center gap-2">
 					<img src={page.data.user.avatarUrl} alt="User Avatar" class="h-6 w-6 rounded-full" />
 					<span class="text-xs font-medium text-gray-900">
 						{page.data.user.username}
@@ -116,7 +127,11 @@ function handleSearch(e: SubmitEvent | KeyboardEvent) {
 				</a>
 
 				<a href="/register">
-					<Button size="sm" class="h-8 rounded bg-[#0a95ff] px-3 text-xs font-medium text-white shadow-xs hover:bg-[#0074cc]">Đăng ký</Button>
+					<Button
+						size="sm"
+						class="h-8 rounded bg-[#0a95ff] px-3 text-xs font-medium text-white shadow-xs hover:bg-[#0074cc]">
+						Đăng ký
+					</Button>
 				</a>
 			{/if}
 		</div>

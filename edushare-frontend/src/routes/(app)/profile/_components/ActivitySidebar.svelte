@@ -12,15 +12,8 @@
 	import { sidebarState } from './activitySidebar.svelte.ts';
 </script>
 
-<div class="w-full shrink-0 space-y-1 text-xs sm:w-45">
-	<button
-		onclick={() => sidebarState.setSubTab('summary')}
-		class="flex w-full items-center gap-2 rounded-md px-3 py-2 font-medium transition {sidebarState.activeSubTab ===
-		'summary'
-			? 'bg-slate-100 font-bold text-slate-900'
-			: 'text-slate-600 hover:bg-slate-50'}">
-		<Activity class="h-3.5 w-3.5" /> Summary
-	</button>
+<div class="w-full shrink-0 space-y-1 text-xs sm:w-45 border-r border-slate-200 pr-1 ">
+
 
 	<button
 		onclick={() => sidebarState.setSubTab('knowledge')}

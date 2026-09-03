@@ -19,6 +19,29 @@ export type Category = {
   name: Scalars['String']['output'];
 };
 
+export type ChatMessage = {
+  __typename?: 'ChatMessage';
+  clientTempId: Scalars['String']['output'];
+  content: Scalars['String']['output'];
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  replyToContentPreview?: Maybe<Scalars['String']['output']>;
+  replyToMessageId?: Maybe<Scalars['ID']['output']>;
+  replyToUserName?: Maybe<Scalars['String']['output']>;
+  roomId: Scalars['ID']['output'];
+  userAvatarUrl?: Maybe<Scalars['String']['output']>;
+  userId: Scalars['ID']['output'];
+  userName: Scalars['String']['output'];
+};
+
+export type ChatRoom = {
+  __typename?: 'ChatRoom';
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  unreadCount: Scalars['Int']['output'];
+};
+
 export type Comment = {
   __typename?: 'Comment';
   content: Scalars['String']['output'];
@@ -70,6 +93,18 @@ export type CreateQuestionInput = {
   isPublic?: Scalars['Boolean']['input'];
   thumbnailUrl?: InputMaybe<Scalars['String']['input']>;
   title: Scalars['String']['input'];
+};
+
+export type CursorPaginateRequest = {
+  beforeId?: InputMaybe<Scalars['ID']['input']>;
+  limit: Scalars['Int']['input'];
+};
+
+export type CursorPagingResponse = {
+  __typename?: 'CursorPagingResponse';
+  beforeId?: Maybe<Scalars['ID']['output']>;
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<ChatMessage>;
 };
 
 export type EnumOption = {
@@ -211,6 +246,10 @@ export type Mutation = {
   _empty?: Maybe<Scalars['String']['output']>;
   createLesson: Lesson;
   createQuestion: Question;
+  deleteKnowledge: Scalars['Boolean']['output'];
+  deleteMessage: Scalars['Boolean']['output'];
+  markRead: Scalars['Boolean']['output'];
+  sendMessage: ChatMessage;
   updateLesson: Lesson;
   updateQuestion: Question;
 };
@@ -223,6 +262,29 @@ export type MutationCreateLessonArgs = {
 
 export type MutationCreateQuestionArgs = {
   input: CreateQuestionInput;
+};
+
+
+export type MutationDeleteKnowledgeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteMessageArgs = {
+  messageId: Scalars['ID']['input'];
+  roomId: Scalars['ID']['input'];
+};
+
+
+export type MutationMarkReadArgs = {
+  messageId: Scalars['ID']['input'];
+  roomId: Scalars['ID']['input'];
+};
+
+
+export type MutationSendMessageArgs = {
+  request: SendMessageInput;
+  roomId: Scalars['ID']['input'];
 };
 
 
@@ -247,10 +309,13 @@ export type Query = {
   categories: Array<Category>;
   getFeed: FeedPage;
   knowledge?: Maybe<Knowledge>;
+  knowledgeListByUsername: KnowledgePagePayload;
   lessonLevels: Array<EnumOption>;
   listCommentReplies: Array<Comment>;
   listRootComments: CommentCursorPaging;
+  messages: CursorPagingResponse;
   myKnowledgeList: KnowledgePagePayload;
+  rooms: Array<ChatRoom>;
   searchFeed: FeedSearchResult;
 };
 
@@ -265,6 +330,12 @@ export type QueryKnowledgeArgs = {
 };
 
 
+export type QueryKnowledgeListByUsernameArgs = {
+  input?: InputMaybe<MyKnowledgeFilterInput>;
+  username: Scalars['String']['input'];
+};
+
+
 export type QueryListCommentRepliesArgs = {
   knowledgeId: Scalars['ID']['input'];
   rootCommentId: Scalars['ID']['input'];
@@ -274,6 +345,12 @@ export type QueryListCommentRepliesArgs = {
 export type QueryListRootCommentsArgs = {
   input?: InputMaybe<CommentQueryInput>;
   knowledgeId: Scalars['ID']['input'];
+};
+
+
+export type QueryMessagesArgs = {
+  request: CursorPaginateRequest;
+  roomId: Scalars['ID']['input'];
 };
 
 
@@ -318,6 +395,11 @@ export type QuestionFeedMeta = {
   acceptedAnswerId?: Maybe<Scalars['ID']['output']>;
   content?: Maybe<Scalars['String']['output']>;
   isResolved?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type SendMessageInput = {
+  content: Scalars['String']['input'];
+  replyToMessageId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type UpdateLessonInput = {
@@ -380,6 +462,11 @@ export type CreateQuestionInput = {
   title: string;
 };
 
+export type CursorPaginateRequest = {
+  beforeId?: string | number | null | undefined;
+  limit: number;
+};
+
 export type FeedQueryInput = {
   cursor?: string | null | undefined;
   limit?: number | null | undefined;
@@ -434,6 +521,19 @@ export type UpdateQuestionInput = {
   thumbnailUrl?: string | null | undefined;
   title?: string | null | undefined;
 };
+
+export type RoomsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RoomsQuery = { rooms: Array<{ id: string, name: string, description: string | null, unreadCount: number }> };
+
+export type MessagesQueryVariables = Exact<{
+  roomId: string | number;
+  request: CursorPaginateRequest;
+}>;
+
+
+export type MessagesQuery = { messages: { beforeId: string | null, hasMore: boolean, items: Array<{ id: string, roomId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, replyToMessageId: string | null, replyToUserName: string | null, replyToContentPreview: string | null, createdAt: string, clientTempId: string }> } };
 
 export type GetFeedQueryVariables = Exact<{
   input?: FeedQueryInput | null | undefined;
@@ -529,6 +629,17 @@ export type UpdateLessonMutationVariables = Exact<{
 
 
 export type UpdateLessonMutation = { updateLesson: { id: string, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, allowComment: boolean, contentMarkdown: string | null, level: LessonLevel | null, estimateTimeInMinutes: number | null, category: { id: string } | null } };
+
+export type KnowledgeListByUsernameQueryVariables = Exact<{
+  username: string;
+  input?: MyKnowledgeFilterInput | null | undefined;
+}>;
+
+
+export type KnowledgeListByUsernameQuery = { knowledgeListByUsername: { totalElements: number, totalPages: number, number: number, size: number, content: Array<
+      | { level: LessonLevel | null, estimateTimeInMinutes: number | null, id: string, type: KnowledgeType, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null }
+      | { isResolved: boolean, content: string | null, id: string, type: KnowledgeType, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null }
+    > } };
 
 export type GetReferenceDataQueryVariables = Exact<{ [key: string]: never; }>;
 

@@ -49,6 +49,7 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@stomp/stompjs": "^7.3.0",
 		"carta-md": "^4.11.2",
 		"graphql": "^16.14.2",
 		"graphql-request": "^7.4.0",

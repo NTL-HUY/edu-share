@@ -3,14 +3,19 @@ package com.nbh.edushare.modules.chat;
 import com.nbh.edushare.common.exception.AppException;
 import com.nbh.edushare.modules.chat.dto.RoomUnreadProjection;
 import com.nbh.edushare.modules.chat.dto.request.CursorPaginateRequest;
+import com.nbh.edushare.modules.chat.dto.request.IncomingChatMessage;
 import com.nbh.edushare.modules.chat.dto.request.SendMessageRequest;
+import com.nbh.edushare.modules.chat.dto.response.ChatAckMessage;
 import com.nbh.edushare.modules.chat.dto.response.CursorPagingResponse;
+import com.nbh.edushare.modules.chat.enums.AckStatus;
+import com.nbh.edushare.modules.chat.event.ChatMessageEvent;
 import com.nbh.edushare.modules.chat.pojo.ChatMessage;
 import com.nbh.edushare.modules.chat.pojo.ChatRoom;
 import com.nbh.edushare.modules.chat.pojo.RoomReadState;
 import com.nbh.edushare.modules.chat.repository.ChatMessageRepository;
 import com.nbh.edushare.modules.chat.repository.ChatRoomRepository;
 import com.nbh.edushare.modules.chat.repository.RoomReadStateRepository;
+import com.nbh.edushare.modules.chat.util.ChatMessageBuilder;
 import com.nbh.edushare.modules.user.UserService;
 import com.nbh.edushare.modules.user.dto.response.UserBaseProjection;
 import com.nbh.edushare.modules.user.dto.response.UserRoleProjection;
@@ -19,6 +24,8 @@ import com.nbh.edushare.modules.user.exception.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,11 +40,16 @@ public class ChatServiceImpl implements ChatService {
     private static final int PREVIEW_MAX_LENGTH = 200;
     private static final int DEFAULT_LIMIT = 20;
     private static final int MAX_LIMIT = 100;
-
+    private final ChatWebSocketService chatWebSocketService;
     private final ChatRoomRepository chatRoomRepository;
     private final UserService userService;
     private final ChatMessageRepository chatMessageRepository;
-    private final RoomReadStateRepository  roomReadStateRepository;
+    private final RoomReadStateRepository roomReadStateRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final ChatMapper chatMapper;
+    private final ChatMessageBuilder chatMessageBuilder;
+
 
     @Override
     @Transactional
@@ -48,26 +60,15 @@ public class ChatServiceImpl implements ChatService {
         UserBaseProjection currentUser = userService.findProjectedById(userId, UserBaseProjection.class)
                 .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
 
-        ChatMessage message = new ChatMessage();
-        message.setRoomId(room.getId());
-        message.setUserId(currentUser.getId());
-        message.setUserName(currentUser.getUsername());
-        message.setUserAvatarUrl(currentUser.getAvatarUrl());
-        message.setContent(request.content());
+        ChatMessageBuilder.BuildResult result = chatMessageBuilder.build(
+                room.getId(), currentUser, request.content(), request.replyToMessageId(), null
+        );
 
-        if (request.replyToMessageId() != null) {
-            // reject nếu tin gốc không tồn tại / đã xóa / khác room
-            ChatMessage original = chatMessageRepository.findById(request.replyToMessageId())
-                    .filter(m -> m.getDeletedAt() == null)
-                    .filter(m -> m.getRoomId().equals(roomId))
-                    .orElseThrow(() ->  new AppException("Tin nhắn để phản hồi không tồn tại"));
-
-            message.setReplyToMessageId(original.getId());
-            message.setReplyToUserName(original.getUserName());
-            message.setReplyToContentPreview(buildPreview(original.getContent()));
+        if (result.isFailed()) {
+            throw new AppException(result.errorReason());
         }
 
-        return chatMessageRepository.save(message);
+        return chatMessageRepository.save(result.message());
     }
 
     @Override
@@ -140,7 +141,29 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ChatRoom> getChatRooms(){
+    public void handleStompSendMessage(IncomingChatMessage payload, Long userId) {
+        boolean roomExists = chatRoomRepository.existsByIdAndIsActiveTrue(payload.roomId());
+
+        if (!roomExists) {
+            chatWebSocketService.sendAckToUser(userId, payload.clientTempId(), AckStatus.FAILED, "Phòng không tồn tại hoặc bạn không có quyền");
+            return;
+        }
+
+        ChatMessageEvent event = chatMapper.toChatMessageEvent(payload, userId);
+
+        kafkaTemplate.send(ChatKafkaConfig.CHAT_SEND_MESSAGE_TOPIC, payload.roomId().toString(), event)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        chatWebSocketService.sendAckToUser(userId, payload.clientTempId(), AckStatus.FAILED, "Không gửi được, thử lại");
+                    } else {
+                        chatWebSocketService.sendAckToUser(userId, payload.clientTempId(), AckStatus.PENDING, null);
+                    }
+                });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ChatRoom> getChatRooms() {
         return chatRoomRepository.findByIsActiveTrue();
     }
 
@@ -151,4 +174,6 @@ public class ChatServiceImpl implements ChatService {
                 ? trimmed
                 : trimmed.substring(0, PREVIEW_MAX_LENGTH - 3) + "...";
     }
+
+
 }

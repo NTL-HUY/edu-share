@@ -124,7 +124,7 @@
 </main>
 
 <!-- PAGINATION -->
-<div class="mt-6 flex items-center justify-end gap-1 text-xs">
+<div class="mt-6 flex items-center justify-center gap-1 text-xs">
 	<button
 		disabled={currentPage === 0}
 		class="rounded border border-gray-300 bg-white px-2.5 py-1 text-gray-600 hover:bg-gray-50 disabled:opacity-50"

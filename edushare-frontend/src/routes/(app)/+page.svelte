@@ -1,22 +1,19 @@
 <script lang="ts">
-	import { SlidersHorizontal, ChevronDown, BookOpen, Clock, HelpCircle } from 'lucide-svelte';
 	import '$lib/styles/filter-bar.css';
 	import '$lib/styles/top-bar-header.css';
 	import '$lib/styles/filter-toolbar.css';
 	import '$lib/styles/base-feed.css';
-	import { isLessonFeedMeta, isQuestionFeedMeta } from '$lib/utils/checkTypeName';
 	import type { PageData } from './$types';
-	import { formatTimeAgo } from '$lib/utils/time';
 	import FeedItem from '$lib/components/feed/FeedItem.svelte';
-	import { createSdk } from '$lib/graphql/client';
-	import Button from '$lib/components/ui/button/button.svelte';
-	let { data }: { data: PageData } = $props();
+	import type { UserBaseProjection } from '$lib/types/user';
+
+	let { data, user  }: { data: PageData, user: UserBaseProjection } = $props();
 
 	let items = $state(data.feed?.items ?? []);
 	let cursor = $state(data.feed?.nextCursor ?? null);
 	let hasMore = $state(data.feed?.hasMore ?? false);
 	let loading = $state(false);
-
+	let currentUser = $derived(data.currentUser);
 	let loadMore = async () => {
 		if (!hasMore || loading) return;
 		loading = true;
@@ -63,11 +60,13 @@
 		</div>
 
 		<!-- create question -->
-		<a
-			href="/feed/create"
-			class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow active:scale-95">
-			+ Tạo câu hỏi / kiến thức
-		</a>
+		{#if user}
+			<a
+				href="/feed/create"
+				class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow active:scale-95">
+				+ Tạo câu hỏi / kiến thức
+			</a>
+		{/if}
 	</div>
 
 	<!-- Questions List -->
