@@ -1,0 +1,47 @@
+input CursorPaginateRequest {
+    beforeId: ID
+    limit: Int!
+}
+
+input SendMessageInput {
+    content: String!
+    replyToMessageId: ID
+}
+
+type ChatMessage {
+    id: ID!
+    roomId: ID!
+    userId: ID!
+    userName: String!
+    userAvatarUrl: String
+    content: String!
+    replyToMessageId: ID
+    replyToUserName: String
+    replyToContentPreview: String
+    clientTempId : String!
+    createdAt: String!
+}
+
+type ChatRoom {
+    id: ID!
+    name: String!
+    description: String
+    unreadCount: Int!
+}
+
+type CursorPagingResponse {
+    items: [ChatMessage!]!
+    beforeId: ID
+    hasMore: Boolean!
+}
+
+extend type Query {
+    rooms: [ChatRoom!]!
+    messages(roomId: ID!, request: CursorPaginateRequest!): CursorPagingResponse!
+}
+
+extend type Mutation {
+    sendMessage(roomId: ID!, request: SendMessageInput!): ChatMessage!
+    markRead(roomId: ID!, messageId: ID!): Boolean!
+    deleteMessage(roomId: ID!, messageId: ID!): Boolean!
+}

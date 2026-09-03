@@ -1,0 +1,67 @@
+type FeedItem {
+    knowledgeId: ID!
+    type: KnowledgeType!
+    ownerId: ID!
+    ownerName: String!
+    ownerAvatarUrl: String
+    title: String!
+    abstractText: String
+    thumbnailUrl: String
+    isPublic: Boolean!
+    allowComment: Boolean!
+    categoryId: ID
+    categoryName: String
+    viewsCount: Int!
+    voteScore: Int!
+    commentCount: Int!
+    sourceCreatedAt: String!
+    typeMeta: FeedTypeMeta
+}
+
+type LessonFeedMeta {
+    level: LessonLevel
+    estimateTimeInMinutes: Int
+    contentMarkdown: String
+}
+
+type QuestionFeedMeta {
+    isResolved: Boolean
+    acceptedAnswerId: ID
+    content: String
+}
+
+union FeedTypeMeta = LessonFeedMeta | QuestionFeedMeta
+
+type FeedPage {
+    items: [FeedItem!]!
+    nextCursor: String
+    hasMore: Boolean!
+}
+
+type FeedSearchResult {
+    items: [FeedItem!]!
+    totalCount: Int!
+    page: Int!
+    totalPages: Int!
+}
+
+
+input FeedQueryInput {
+    cursor: String
+    limit: Int = 20
+}
+
+input FeedSearchInput {
+    keyword: String
+    type: KnowledgeType
+    categoryId: ID
+    level: LessonLevel
+    page: Int = 0
+    size: Int = 20
+    sort: String
+}
+
+extend type Query {
+    getFeed(input: FeedQueryInput): FeedPage!
+    searchFeed(input: FeedSearchInput!): FeedSearchResult!
+}

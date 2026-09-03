@@ -1,0 +1,12 @@
+{
+	"files.associations": {
+		"*.css": "tailwindcss"
+   },
+   "python-envs.pythonProjects": [
+      {
+         "path": "src/routes",
+         "envManager": "ms-python.python:venv",
+         "packageManager": "ms-python.python:pip"
+      }
+   ]
+}

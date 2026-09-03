@@ -1,0 +1,178 @@
+mutation CreateLesson($input: CreateLessonInput!) {
+  createLesson(input: $input) {
+    id
+    type
+    title
+    abstractText
+    thumbnailUrl
+    isPublic
+    allowComment
+    contentMarkdown
+    level
+    estimateTimeInMinutes
+    createdAt
+    viewsCount
+    voteScore
+    commentCount
+    currentUserVote
+    owner {
+      id
+    }
+    category {
+      id
+      name
+    }
+  }
+}
+
+mutation CreateQuestion($input: CreateQuestionInput!) {
+  createQuestion(input: $input) {
+    id
+    type
+    title
+    abstractText
+    thumbnailUrl
+    isPublic
+    allowComment
+    content
+    isResolved
+    acceptedAnswerId
+    createdAt
+    viewsCount
+    voteScore
+    commentCount
+    currentUserVote
+    owner {
+      id
+    }
+    category {
+      id
+      name
+    }
+  }
+}
+
+
+query GetMyKnowledgeList($input: MyKnowledgeFilterInput) {
+    myKnowledgeList(input: $input) {
+        totalElements
+        totalPages
+        number
+        size
+        content {
+            id
+            type
+            title
+            abstractText
+            thumbnailUrl
+            isPublic
+            viewsCount
+            voteScore
+            commentCount
+            createdAt
+            
+            # Lấy trường riêng của Lesson nếu là LESSON
+            ... on Lesson {
+                level
+                estimateTimeInMinutes
+            }
+            
+            # Lấy trường riêng của Question nếu là QUESTION
+            ... on Question {
+                isResolved
+                content
+            }
+        }
+    }
+}
+
+
+query GetKnowledge($id: ID!) {
+	knowledge(id: $id) {
+		id
+		type
+		title
+		abstractText
+		thumbnailUrl
+		isPublic
+		allowComment
+		category {
+			id
+		}
+		... on Lesson {
+			contentMarkdown
+			level
+			estimateTimeInMinutes
+		}
+		... on Question {
+			content
+			isResolved
+		}
+	}
+}
+
+
+mutation UpdateQuestion($input: UpdateQuestionInput!) {
+	updateQuestion(input: $input) {
+		id
+		title
+		abstractText
+		thumbnailUrl
+		isPublic
+		allowComment
+		content
+		isResolved
+		category {
+			id
+		}
+	}
+}
+
+
+mutation UpdateLesson($input: UpdateLessonInput!) {
+	updateLesson(input: $input) {
+		id
+		title
+		abstractText
+		thumbnailUrl
+		isPublic
+		allowComment
+		contentMarkdown
+		level
+		estimateTimeInMinutes
+		category {
+			id
+		}
+	}
+}
+
+query KnowledgeListByUsername($username: String!, $input: MyKnowledgeFilterInput) {
+    knowledgeListByUsername(username: $username, input: $input) {
+        totalElements
+        totalPages
+        number
+        size
+        content {
+            id
+            type
+            title
+            abstractText
+            thumbnailUrl
+            isPublic
+            viewsCount
+            voteScore
+            commentCount
+            createdAt
+            
+            ... on Lesson {
+                level
+                estimateTimeInMinutes
+            }
+            
+            ... on Question {
+                isResolved
+                content
+            }
+        }
+    }
+}

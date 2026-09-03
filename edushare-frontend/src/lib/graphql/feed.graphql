@@ -1,0 +1,135 @@
+# src/lib/graphql/feed.graphql
+query GetFeed($input: FeedQueryInput) {
+	getFeed(input: $input) {
+		items {
+			knowledgeId
+			type
+			ownerId
+			ownerName
+			ownerAvatarUrl
+			title
+			abstractText
+			thumbnailUrl
+			categoryId
+			categoryName
+			viewsCount
+			voteScore
+			commentCount
+			sourceCreatedAt
+			typeMeta {
+				__typename
+				... on LessonFeedMeta {
+					level
+					estimateTimeInMinutes
+					contentMarkdown
+				}
+				... on QuestionFeedMeta {
+					isResolved
+					acceptedAnswerId
+					content
+				}
+			}
+		}
+		nextCursor
+		hasMore
+	}
+}
+
+query searchFeed($input: FeedSearchInput!) {
+	searchFeed(input: $input) {
+		items {
+			knowledgeId
+			type
+			ownerId
+			ownerName
+			ownerAvatarUrl
+			title
+			abstractText
+			thumbnailUrl
+			categoryId
+			categoryName
+			viewsCount
+			voteScore
+			commentCount
+			sourceCreatedAt
+			typeMeta {
+				__typename
+				... on LessonFeedMeta {
+					level
+					estimateTimeInMinutes
+					contentMarkdown
+				}
+				... on QuestionFeedMeta {
+					isResolved
+					acceptedAnswerId
+					content
+				}
+			}
+		}
+		totalCount
+		totalPages
+		page
+	}
+}
+
+query GetKnowledgeDetail($id: ID!, $commentInput: CommentQueryInput) {
+	knowledge(id: $id) {
+		__typename
+		id
+		title
+		type
+		abstractText
+		thumbnailUrl
+		category {
+			id
+			name
+		}
+		viewsCount
+		voteScore
+		commentCount
+		createdAt
+		currentUserVote
+		owner {
+			id
+			username
+			avatarUrl
+		}
+
+		# Inline Fragment cho Lesson
+		... on Lesson {
+			contentMarkdown
+			estimateTimeInMinutes
+			level
+		}
+
+		# Inline Fragment cho Question
+		... on Question {
+			content
+			isResolved
+			acceptedAnswerId
+		}
+
+		# Sub-field lấy danh sách bình luận gốc
+		comments(input: $commentInput) {
+			items {
+				id
+				knowledgeId
+				userId
+				userName
+				userAvatarUrl
+				content
+				rootCommentId
+				replyToCommentId
+				replyToUserName
+				replyCount
+				createdAt
+				updatedAt
+			}
+			hasMore
+			nextCursor
+		}
+	}
+}
+
+
+

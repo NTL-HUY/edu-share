@@ -1,0 +1,35 @@
+type Comment {
+    id: ID!
+    knowledgeId: ID!
+    userId: ID!
+    userName: String!
+    userAvatarUrl: String
+    content: String!
+
+    rootCommentId: ID
+    replyToCommentId: ID
+    replyToUserName: String
+    replyCount: Int!
+
+    createdAt: String!
+    updatedAt: String
+    deletedAt: String
+    deletedBy: ID
+}
+
+input CommentQueryInput {
+    cursor: String
+    limit: Int
+}
+
+type CommentCursorPaging {
+    items: [Comment!]!
+    nextCursor: String
+    hasMore: Boolean!
+}
+
+extend type Query {
+    listRootComments(knowledgeId: ID!, input: CommentQueryInput): CommentCursorPaging!
+    listCommentReplies(knowledgeId: ID!, rootCommentId: ID!): [Comment!]!
+}
+

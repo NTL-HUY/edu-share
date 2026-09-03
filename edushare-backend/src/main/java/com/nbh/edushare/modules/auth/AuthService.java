@@ -8,4 +8,6 @@ import com.nbh.edushare.modules.user.dto.response.UserSimpleResponse;
 public interface AuthService {
     UserSimpleResponse registerUser(RegisterRequest registerRequest);
     AuthTokenResponse login(String usernameOrEmail, String password);
+    AuthTokenResponse refreshToken(String rawToken);
+    void logout(Long userId, String refreshToken);
 }

@@ -22,12 +22,12 @@ public class AuthenticatedUser implements UserDetails {
 
     @Override
     public String getPassword() {
-        return userAuthInfo.passwordHash();
+        return userAuthInfo.getPasswordHash();
     }
 
     @Override
     public String getUsername() {
-        return userAuthInfo.username();
+        return userAuthInfo.getUsername();
     }
 
     @Override
@@ -47,7 +47,7 @@ public class AuthenticatedUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return userAuthInfo.deletedAt() == null;
+        return userAuthInfo.getDeletedAt() == null;
     }
 
 }
