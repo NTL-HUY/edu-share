@@ -14,7 +14,6 @@ import java.util.Optional;
 
 public interface FeedItemRepository extends JpaRepository<FeedItem, Long>, JpaSpecificationExecutor<FeedItem> {
 
-    //    Public feed theo owners (famous / normal followee)
     @Query("""
                 SELECT fi FROM FeedItem fi
                 WHERE fi.ownerId IN :ownerIds
@@ -45,7 +44,6 @@ public interface FeedItemRepository extends JpaRepository<FeedItem, Long>, JpaSp
             Pageable pageable
     );
 
-    // ================== Discovery (public, loại trừ các id đã có trong pool) ==================
 
     @Query("""
                 SELECT fi FROM FeedItem fi

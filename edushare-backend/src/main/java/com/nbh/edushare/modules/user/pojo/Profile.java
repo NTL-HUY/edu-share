@@ -24,28 +24,28 @@ public class Profile extends TimeStampedModel {
     private User user;
 
     @Column(length = 20)
-    private String studentId; // MSSV: 2351050055
+    private String studentId;
 
     @Column(length = 100)
-    private String university; // Trường: Đại học Mở TP.HCM
+    private String university;
 
     @Column(length = 100)
-    private String faculty; // Khoa: Công nghệ Thông tin
+    private String faculty;
 
     @Column(length = 100)
-    private String major; // Ngành: Kỹ thuật Phần mềm
+    private String major;
 
     @Column(length = 20)
-    private String className; // Lớp: DH23IT01
+    private String className;
 
     @Column(length = 10)
-    private String academicYear; // Niên khóa: K23
+    private String academicYear;
 
     @Column(precision = 3, scale = 2)
-    private BigDecimal cpa; // Điểm CPA: 3.62
+    private BigDecimal cpa;
 
     @Column(columnDefinition = "TEXT")
-    private String bio; // Giới thiệu bản thân
+    private String bio;
 
     private String coverUrl;
 

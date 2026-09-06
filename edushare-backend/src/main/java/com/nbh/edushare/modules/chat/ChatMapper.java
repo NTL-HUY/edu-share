@@ -12,8 +12,6 @@ public interface ChatMapper {
     @Mapping(target = "createdAt", expression = "java(LocalDateTime.now())")
     ChatMessageEvent toChatMessageEvent(IncomingChatMessage request, Long userId);
 
-    // Các field này KHÔNG có trong ChatMessageEvent → phải set tay sau khi map,
-    // nên khai báo ignore để MapStruct không báo lỗi "unmapped target property"
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

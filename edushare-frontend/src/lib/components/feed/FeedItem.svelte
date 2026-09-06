@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { FeedItem } from "$lib/generated/types";
-	import { isLessonFeedMeta, isQuestionFeedMeta } from "$lib/utils/checkTypeName";
-	import { formatTimeAgo } from "$lib/utils/time";
-	import { BookOpen, Clock1, HelpCircle } from "lucide-svelte";
+	import type { FeedItem } from '$lib/generated/types';
+	import { isLessonFeedMeta, isQuestionFeedMeta } from '$lib/utils/checkTypeName';
+	import { formatTimeAgo } from '$lib/utils/time';
+	import { BookOpen, Clock1, HelpCircle } from 'lucide-svelte';
 	import './feed-item.css';
 
 	let { feedItem }: { feedItem: FeedItem } = $props();
-   // console.log('feedItem in FeedItem.svelte:', feedItem);
+	// console.log('feedItem in FeedItem.svelte:', feedItem);
 </script>
 
 <div class="feed-item">
@@ -50,28 +50,40 @@
 			{/if}
 		</div>
 
-		<h2 class="title">
-			<a href={`/feed/${feedItem.knowledgeId}`}>{feedItem.title}</a>
-		</h2>
+		<div class="content-body">
+			<div class="text-group">
+				<h2 class="title">
+					<a href={`/feed/${feedItem.knowledgeId}`}>{feedItem.title}</a>
+				</h2>
 
-		<p class="description">
-			{#if isLessonFeedMeta(feedItem.typeMeta)}
-				{feedItem.abstractText}
-			{:else if isQuestionFeedMeta(feedItem.typeMeta)}
-				{feedItem.typeMeta?.content ?? feedItem.abstractText}
+				<p class="description">
+					{#if isLessonFeedMeta(feedItem.typeMeta)}
+						{feedItem.abstractText}
+					{:else if isQuestionFeedMeta(feedItem.typeMeta)}
+						{feedItem.typeMeta?.content ?? feedItem.abstractText}
+					{/if}
+				</p>
+			</div>
+
+			<!-- BỔ SUNG THUMBNAIL TẠI ĐÂY -->
+			{#if feedItem.thumbnailUrl}
+				<a href={`/feed/${feedItem.knowledgeId}`} class="thumbnail-wrapper">
+					<img src={feedItem.thumbnailUrl} alt={feedItem.title} class="thumbnail-img" />
+				</a>
 			{/if}
-		</p>
+		</div>
 
 		<!-- Tags & Author Info Footer -->
 		<div class="footer">
 			<!-- Tags -->
-			<div class="tags-list">
-			
-			</div>
+			<div class="tags-list"></div>
 
 			<!-- Author info -->
 			<div class="author-info">
-				<img src={`${feedItem.ownerAvatarUrl ?? `https://ui-avatars.com/api/?name=${feedItem.ownerName}`}`} alt={feedItem.ownerName} class="avatar" />
+				<img
+					src={`${feedItem.ownerAvatarUrl ?? `https://ui-avatars.com/api/?name=${feedItem.ownerName}`}`}
+					alt={feedItem.ownerName}
+					class="avatar" />
 				<a href={`/profile/${feedItem.ownerName}`} class="author-name">{feedItem.ownerName}</a>
 				<!-- <span class="reputation">{feedItem.ownerReputation}</span> -->
 				<span>Dang:{formatTimeAgo(feedItem.sourceCreatedAt)}</span>

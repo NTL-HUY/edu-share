@@ -54,7 +54,6 @@ public class ChatMessageListener {
             chatWebSocketService.sendAckToUser(event.userId(), event.clientTempId(), AckStatus.FAILED, result.errorReason());
             return;
         }
-// 🔴 GIẢ LẬP ĐỘ TRỄ 3 GIÂY ĐỂ TEST
         try {
             Thread.sleep(5000); // 3000ms = 3 giây
         } catch (InterruptedException e) {
@@ -62,7 +61,6 @@ public class ChatMessageListener {
         }
         ChatMessage saved = chatMessageRepository.save(result.message());
 
-//        chatWebSocketService.sendAckToUser(event.userId(), event.clientTempId(), AckStatus.SENT, null);
 
         messagingTemplate.convertAndSend(
                 "/topic/room-" + saved.getRoomId(),

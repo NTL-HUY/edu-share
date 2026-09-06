@@ -36,7 +36,6 @@ class FeedServiceImpl implements FeedService {
     @Value("${app.feed.discovery-cache-ttl-seconds:60}")
     private long discoveryCacheTtlSeconds;
 
-//    private final FeedMapper feedMapper;
     private final FeedItemRepository  feedItemRepository;
     private final UserFeedRepository userFeedRepository;
     private final UserService userService;
@@ -83,13 +82,11 @@ class FeedServiceImpl implements FeedService {
 
         Map<Long, FeedItem> pool = new LinkedHashMap<>();
 
-        // 1. Pushed (đã lọc public/owner ở repo)
         List<FeedItem> pushed = (cursor == null)
                 ? userFeedRepository.findPushedFeedFirstPage(userId, pageable)
                 : userFeedRepository.findPushedFeed(userId, cursor.createdAt(), cursor.id(), pageable);
         putAll(pool, pushed);
 
-        // 2. Famous - chỉ public
         List<Long> famousIds = userService.findFamousFolloweeIds(userId);
         if (!famousIds.isEmpty()) {
             List<FeedItem> kolFeed = (cursor == null)
@@ -98,7 +95,6 @@ class FeedServiceImpl implements FeedService {
             putAll(pool, kolFeed);
         }
 
-        // 3. Fallback followee thường - chỉ public, chỉ fetch khi vẫn còn thiếu
         if (pool.size() < effectiveLimit) {
             List<Long> normalIds = userService.findNormalFolloweeIds(userId);
             if (!normalIds.isEmpty()) {
@@ -110,7 +106,6 @@ class FeedServiceImpl implements FeedService {
             }
         }
 
-        // 4. Discovery - chỉ public, chỉ fetch khi vẫn còn thiếu
         if (pool.size() < effectiveLimit) {
             List<Long> excludeIds = pool.isEmpty() ? List.of(-1L) : new ArrayList<>(pool.keySet());
             Pageable discoveryPageable = PageRequest.of(0, effectiveLimit - pool.size());

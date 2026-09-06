@@ -17,7 +17,6 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLRestriction("deleted_at IS NULL")
 public class User extends SoftDeleteModel {
 
-    // đánh thêm partial unique bằng sql
     @Column(nullable = false,  length = 50)
     private String username;
 
@@ -40,6 +39,5 @@ public class User extends SoftDeleteModel {
     @Column(name = "user_role",nullable = false)
     private UserRole userRole = UserRole.USER;
 
-//    xử lý thêm cascade của profile bằng sql
 
 }

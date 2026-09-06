@@ -21,6 +21,5 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             Pageable pageable
     );
 
-//    boolean existsByIdAndRoomIdAndDeletedAtIsNull(Long id, Long roomId);
     boolean existsByClientTempIdAndUserId(String clientTempId, Long userId);
 }

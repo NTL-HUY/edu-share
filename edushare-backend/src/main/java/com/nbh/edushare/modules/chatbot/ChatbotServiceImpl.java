@@ -35,7 +35,6 @@ public class ChatbotServiceImpl implements ChatbotService {
                     })
                     .body(ChatResponse.class);
         } catch (ResourceAccessException e) {
-            // timeout / connection refused / không kết nối được Python service
             throw new AppException(ChatbotErrorCode.RAG_SERVICE_UNAVAILABLE);
         }
     }

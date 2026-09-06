@@ -19,8 +19,6 @@ import java.time.Duration;
 @EnableCaching
 public class RedisConfig {
 
-    // Dùng chung 1 cách tạo mapper cho cả 2 bean, để chắc chắn format ghi/đọc giống hệt nhau.
-    // KHÔNG bao giờ lấy ObjectMapper từ Spring bean global (autowire) ở đây.
     private ObjectMapper newRedisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -37,7 +35,7 @@ public class RedisConfig {
 
         GenericJackson2JsonRedisSerializer serializer = GenericJackson2JsonRedisSerializer.builder()
                 .objectMapper(newRedisObjectMapper())
-                .defaultTyping(true)   // giữ đúng cơ chế cũ
+                .defaultTyping(true)
                 .build();
 
         template.setValueSerializer(serializer);
@@ -49,10 +47,9 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
-        // Không còn nhận ObjectMapper mapper (bean global) làm tham số nữa.
         GenericJackson2JsonRedisSerializer serializer = GenericJackson2JsonRedisSerializer.builder()
                 .objectMapper(newRedisObjectMapper())
-                .defaultTyping(true)   // giống hệt redisTemplate ở trên
+                .defaultTyping(true)
                 .build();
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @MappedSuperclass
-public class SoftDeleteModel extends BaseModel{
+public abstract class SoftDeleteModel extends BaseModel{
     @Column(name = "deleted_at")
     protected LocalDateTime deletedAt;
 

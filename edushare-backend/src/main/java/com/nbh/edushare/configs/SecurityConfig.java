@@ -59,16 +59,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Cấp phép Origin từ Frontend SvelteKit
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedOriginPatterns(List.of("*"));
-        // Cấp phép tất cả các Method HTTP
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
-        // Cấp phép các Header cần thiết
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
 
-        // Nếu bạn gửi Cookie hoặc Header Authorization mang Session/Token
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

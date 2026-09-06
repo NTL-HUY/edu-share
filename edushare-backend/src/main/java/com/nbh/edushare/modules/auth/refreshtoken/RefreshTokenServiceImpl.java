@@ -63,7 +63,7 @@ class RefreshTokenServiceImpl implements RefreshTokenService {
         }
 
         try {
-            refreshToken.getUser().getId(); // force load, kiểm tra user còn tồn tại (chưa bị filter)
+            refreshToken.getUser().getId();
         } catch (EntityNotFoundException e) {
             throw new AppException(UserErrorCode.USER_INACTIVE);
         }

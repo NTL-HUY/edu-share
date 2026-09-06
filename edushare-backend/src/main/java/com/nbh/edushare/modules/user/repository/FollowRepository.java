@@ -19,11 +19,9 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
 
 
-    // Lấy danh sách những người đang theo dõi user này (Followers)
     @Query("SELECT f.follower FROM Follow f WHERE f.followee.id = :userId")
     Page<User> findFollowersByUserId(@Param("userId") Long userId, Pageable pageable);
 
-    // Lấy danh sách những người mà user này đang theo dõi (Following)
     @Query("SELECT f.followee FROM Follow f WHERE f.follower.id = :userId")
     Page<User> findFollowingByUserId(@Param("userId") Long userId, Pageable pageable);
 

@@ -37,7 +37,6 @@ public class JwtServiceImpl implements JwtService {
             this.jwtSigner = new MACSigner(secretKey);
             this.jwtVerifier = new MACVerifier(secretKey);
         } catch (JOSEException e) {
-            // secretKey ngắn hơn 32 ký tự (HS256 yêu cầu tối thiểu 256-bit)
             throw new AppException(AuthErrorCode.JWT_TOKEN_INVALID,e.getMessage());
         }
     }

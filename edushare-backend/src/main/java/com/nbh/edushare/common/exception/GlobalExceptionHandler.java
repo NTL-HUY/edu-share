@@ -62,7 +62,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException e, HttpServletRequest request) {
 
-        // Lấy thông điệp lỗi đầu tiên từ Annotation (ví dụ: "File không được để trống")
         String errorMessage = e.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(FieldError::getDefaultMessage)

@@ -20,7 +20,6 @@ public class FollowController {
 
     private final FollowService followService;
 
-    // 1. Follow a user
     @PostMapping("/{username}/follow")
     public ResponseEntity<Object> followUser(
             @PathVariable String username,
@@ -30,7 +29,6 @@ public class FollowController {
         return ResponseEntity.ok(Map.of("message", "Follow thành công"));
     }
 
-    // 2. Unfollow a user
     @DeleteMapping("/{username}/follow")
     public ResponseEntity<Object> unfollowUser(
             @PathVariable String username,
@@ -40,7 +38,6 @@ public class FollowController {
         return ResponseEntity.ok(Map.of("message", "Unfollow thành công"));
     }
 
-    // 3. Check status (đang follow hay chưa)
     @GetMapping("/{username}/follow/status")
     public ResponseEntity<FollowStatusResponse> checkFollowStatus(
             @PathVariable String username,
@@ -50,7 +47,6 @@ public class FollowController {
         return ResponseEntity.ok(status);
     }
 
-    // 4. Lấy danh sách Followers (Public API)
     @GetMapping("/{username}/followers")
     public ResponseEntity<Page<UserSimpleResponse>> getFollowers(
             @PathVariable String username,
@@ -60,7 +56,6 @@ public class FollowController {
         return ResponseEntity.ok(followers);
     }
 
-    // 5. Lấy danh sách Following (Public API)
     @GetMapping("/{username}/following")
     public ResponseEntity<Page<UserSimpleResponse>>getFollowing(
             @PathVariable String username,

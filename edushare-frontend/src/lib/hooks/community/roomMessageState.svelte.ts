@@ -137,14 +137,12 @@ export class RoomMessageState {
 
 		this.items = [tempMessage, ...this.items];
 
-		setTimeout(() => {
-			stompClient.publish('/app/chat.send', {
-				clientTempId: clientTempId,
-				roomId: this.roomId,
-				content,
-				replyToMessageId: replyToId
-			});
-		}, 5000);
+		stompClient.publish('/app/chat.send', {
+			clientTempId: clientTempId,
+			roomId: this.roomId,
+			content,
+			replyToMessageId: replyToId
+		});
 
 		this.cancelReply();
 	}

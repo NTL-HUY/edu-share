@@ -15,10 +15,6 @@ public interface QuestionMapper {
 
     @Mapping(target = "type", constant = "QUESTION")
     @Mapping(target = "isResolved", constant = "false")
-//    @Mapping(target = "acceptedAnswerId", ignore = true)
-//    @Mapping(target = "owner", ignore = true)
-//    @Mapping(target = "category", ignore = true)
-//    @Mapping(target = "deletedBy", ignore = true)
     Question toEntity(CreateQuestionCommand command);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

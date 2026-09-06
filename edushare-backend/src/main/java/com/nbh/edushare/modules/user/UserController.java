@@ -19,11 +19,6 @@ public class UserController {
 
     private final UserService userService;
 
-//    @GetMapping("/{username}/profile")
-//    public ResponseEntity<ProfileResponse> getProfile(@PathVariable String username) {
-//        return ResponseEntity.ok(userService.getProfile(username));
-//    }
-
     @GetMapping("/me")
     public ResponseEntity<UserBaseProjection> getMe(@AuthenticationPrincipal Long userId) {
         UserBaseProjection me = userService.findProjectedById(userId, UserBaseProjection.class)

@@ -66,19 +66,6 @@ class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public Optional<UserAuthInfo> findByUsernameOrEmail(String usernameOrEmail) {
         return userRepository.findByUsernameOrEmail(usernameOrEmail, UserAuthInfo.class);
-
-
-
-//        java
-//        Optional<User> userOpt = userRepository.findByUsernameOrEmail(usernameOrEmail);
-//
-//        if (userOpt.isPresent()) {
-//            User user = userOpt.get();
-//            UserAuthInfo info = userMapper.toUserAuthInfo(user);  // ← đây, vẫn gọi userMapper
-//            return Optional.of(info);
-//        } else {
-//            return Optional.empty();
-//        }
     }
 
     @Override
@@ -138,16 +125,6 @@ class UserServiceImpl implements UserService {
         return userMapper.toProfileResponse(targetUser, profile, isMe, isFollowing);
     }
 
-//    @Override
-//    @Transactional
-//    public ProfileResponse updateProfile(Long currentUserId, UpdateProfileRequest request) {
-//        Profile profile = profileRepository.findById(currentUserId)
-//                .orElseThrow(() -> new AppException(UserErrorCode.PROFILE_NOT_FOUND));
-//
-//        userMapper.updateProfileFromRequest(request, profile);
-//
-//        return userMapper.toProfileResponse(profile);
-//    }
 
     @Transactional
     @Override

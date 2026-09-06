@@ -17,27 +17,12 @@ public class Lesson extends Knowledge {
     @Column(name = "content_markdown")
     private String contentMarkdown;
 
-//    @JdbcTypeCode(SqlTypes.JSON)
-//    @Column(name = "toc_json")
-//    private String tocJson; // hoặc map sang Map<String,Object> nếu cần thao tác cấu trúc
-
-//    @Column(name = "video_url")
-//    private String videoUrl;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "level")
     private LessonLevel level;
 
-//    @Column(name = "is_preview", nullable = false)
-//    private Boolean isPreview;
 
     @Column(name = "estimate_time_in_minutes")
     private Integer estimateTimeInMinutes;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "course_id", referencedColumnName = "knowledge_id")
-//    private Course course;
 
-//    @Column(name = "order_index")
-//    private Integer orderIndex;
 }

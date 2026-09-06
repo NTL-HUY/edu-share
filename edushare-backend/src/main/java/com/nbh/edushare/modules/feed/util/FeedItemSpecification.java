@@ -14,7 +14,6 @@ public class FeedItemSpecification {
             List<Predicate> predicates = new ArrayList<>();
 
             predicates.add(cb.isTrue(root.get("isPublic")));
-//            predicates.add(cb.isNull(root.get("deletedAt")));
 
             if (input.type() != null) {
                 predicates.add(cb.equal(root.get("type"), input.type()));
@@ -23,7 +22,6 @@ public class FeedItemSpecification {
             if (input.categoryId() != null) {
                 predicates.add(cb.equal(root.get("categoryId"), input.categoryId()));
             }
-//                WHERE jsonb_extract_path_text(type_meta, 'level') = 'BEGINNER'
             if (input.level() != null) {
                 predicates.add(cb.equal(
                         cb.function("jsonb_extract_path_text", String.class,

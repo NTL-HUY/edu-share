@@ -14,7 +14,6 @@ public class ChatMessage extends SoftDeleteModel {
     @Column(name = "room_id", nullable = false)
     private Long roomId;
 
-    // denormalize thông tin người gửi
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
@@ -27,7 +26,6 @@ public class ChatMessage extends SoftDeleteModel {
     @Column(name = "client_temp_id", nullable = false, length = 100)
     private String clientTempId;
 
-    // ===== reply
     @Column(name = "reply_to_message_id")
     private Long replyToMessageId;
 
