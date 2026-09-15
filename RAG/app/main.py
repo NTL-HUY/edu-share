@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
 from app import db
+from app.config import config
 from app.dto import EmbedResponse, EmbedRequest, ChatResponse, ChatRequest, ChatSource
 from app.embedding import embed_texts
 from app.listener import start_consumer_task, stop_consumer_task
@@ -16,6 +17,7 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    print("Đang kết nối DB...")
     await db.init_pool()
     start_consumer_task()
 
@@ -37,9 +39,9 @@ def embed(request: EmbedRequest):
     if not request.texts:
         raise HTTPException(status_code=400, detail="texts không được rỗng")
 
-    embeddings = embed_texts(request.texts, normalize=request.normalize)
+    embeddings = embed_texts(request.texts)
     return EmbedResponse(
-        model=os.getenv("MODEL_NAME", "bkai-foundation-models/vietnamese-bi-encoder"),
+        model=config.ACTIVE_MODEL_NAME,
         dim=len(embeddings[0]),
         embeddings=embeddings,
     )

@@ -54,11 +54,7 @@ public class ChatMessageListener {
             chatWebSocketService.sendAckToUser(event.userId(), event.clientTempId(), AckStatus.FAILED, result.errorReason());
             return;
         }
-        try {
-            Thread.sleep(5000); // 3000ms = 3 giây
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+
         ChatMessage saved = chatMessageRepository.save(result.message());
 
 

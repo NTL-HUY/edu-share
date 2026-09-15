@@ -72,4 +72,10 @@ public class FeedProjectionServiceImpl implements FeedProjectionService {
 
         userFeedRepository.saveAll(userFeeds);
     }
+
+    @Override
+    public void handleFamousPromotedUser(java.util.Collection<Long> userIds) {
+        userFeedRepository.deleteByOwnerIdIn(userIds);
+    }
+
 }

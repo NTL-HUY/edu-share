@@ -17,6 +17,8 @@ import com.nbh.edushare.modules.knowledge.event.create.KnowledgeCreatedEvent;
 import com.nbh.edushare.modules.knowledge.mapper.KnowledgeEventMapper;
 import com.nbh.edushare.modules.knowledge.mapper.LessonMapper;
 import com.nbh.edushare.modules.knowledge.mapper.QuestionMapper;
+import com.nbh.edushare.modules.knowledge.port.CommentQueryPort;
+import com.nbh.edushare.modules.interaction.dto.response.CommentResponse;
 import com.nbh.edushare.modules.knowledge.pojo.*;
 import com.nbh.edushare.modules.knowledge.repository.CategoryRepository;
 import com.nbh.edushare.modules.knowledge.repository.KnowledgeRepository;
@@ -51,6 +53,7 @@ class KnowledgeServiceImpl implements KnowledgeService {
 
     private final UserService userService;
     private final KnowledgeEventMapper knowledgeEventMapper;
+    private final CommentQueryPort commentQueryPort;
 
     private final ApplicationEventPublisher eventPublisher;
 
@@ -70,18 +73,6 @@ class KnowledgeServiceImpl implements KnowledgeService {
         Question saved = saveKnowledge(question, command.categoryId(), ownerId, questionRepository);
         return questionMapper.toDetailResponse(saved);
     }
-
-//    @Override
-//    public KnowledgeDetailResponse getKnowledgeDetailForEdit(Long id, Long currentUserId) {
-//        Knowledge knowledge = knowledgeRepository.findDetailById(id)
-//                .orElseThrow(() -> new AppException(KnowledgeErrorCode.KNOWLEDGE_NOT_FOUND));
-//
-//        if (!knowledge.getOwner().getId().equals(currentUserId)) {
-//            throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ACCESS_DENIED);
-//        }
-//
-//        return builDetailResponse(knowledge);
-//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -119,6 +110,28 @@ class KnowledgeServiceImpl implements KnowledgeService {
     @Override
     @Transactional
     public QuestionDetailResponse updateQuestion(UpdateQuestionCommand command, Long currentUserId) {
+        Question existing = questionRepository.findById(command.id())
+                .orElseThrow(() -> new AppException(KnowledgeErrorCode.KNOWLEDGE_NOT_FOUND));
+
+        if (existing.getIsResolved()) {
+            boolean titleChanged = command.title() != null
+                    && !command.title().equals(existing.getTitle());
+            boolean contentChanged = command.content() != null
+                    && !command.content().equals(existing.getContent());
+            if (titleChanged || contentChanged) {
+                throw new AppException(KnowledgeErrorCode.QUESTION_CONTENT_LOCKED);
+            }
+        }
+
+        if (command.acceptedAnswerId() != null) {
+            CommentResponse comment = commentQueryPort.getCommentById(command.acceptedAnswerId())
+                    .orElseThrow(() -> new AppException(KnowledgeErrorCode.ACCEPTED_ANSWER_INVALID));
+
+            if (!comment.knowledgeId().equals(command.id())) {
+                throw new AppException(KnowledgeErrorCode.ACCEPTED_ANSWER_INVALID);
+            }
+        }
+
         Question question = updateKnowledge(
                 command.id(),
                 command.categoryId(),
@@ -139,12 +152,15 @@ class KnowledgeServiceImpl implements KnowledgeService {
             throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ALREADY_DELETED);
         }
 
-        UserRoleProjection currentUser = userService.findProjectedById(currentUserId,UserRoleProjection.class)
-                .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
-
         boolean isOwner = entity.getOwner().getId().equals(currentUserId);
-        if(!isOwner && !currentUser.getUserRole().equals(UserRole.ADMIN)){
-            throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ACCESS_DENIED);
+
+        if (!isOwner) {
+            UserRoleProjection currentUser = userService.findProjectedById(currentUserId, UserRoleProjection.class)
+                    .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+            if (!currentUser.getUserRole().equals(UserRole.ADMIN)) {
+                throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ACCESS_DENIED);
+            }
         }
 
         entity.setDeletedAt(LocalDateTime.now());
@@ -219,7 +235,11 @@ class KnowledgeServiceImpl implements KnowledgeService {
         T entity = repository.findById(id)
                 .orElseThrow(() -> new AppException(KnowledgeErrorCode.KNOWLEDGE_NOT_FOUND));
 
-        if (!entity.getOwner().getId().equals(currentUserId)) {
+        UserRoleProjection currentUser = userService.findProjectedById(currentUserId, UserRoleProjection.class)
+                .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+        boolean isOwner = entity.getOwner().getId().equals(currentUserId);
+        if (!isOwner && !currentUser.getUserRole().equals(UserRole.ADMIN)) {
             throw new AppException(KnowledgeErrorCode.KNOWLEDGE_ACCESS_DENIED);
         }
 

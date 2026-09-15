@@ -10,4 +10,6 @@ public interface FeedProjectionService {
     FeedItem processKnowledgeUpdated(KnowledgeUpdatedEvent event);
     void processKnowledgeDeleted(KnowledgeDeletedEvent event);
     void fanOutToFollowers(long ownerId, long knowledgeId);
+
+    void handleFamousPromotedUser(java.util.Collection<Long> userIds);
 }

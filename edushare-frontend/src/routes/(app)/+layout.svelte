@@ -37,4 +37,4 @@
 </div>
 
 
-<!-- <Chatbot /> -->
+<Chatbot />

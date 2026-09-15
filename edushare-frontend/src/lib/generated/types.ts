@@ -417,6 +417,7 @@ export type UpdateLessonInput = {
 
 export type UpdateQuestionInput = {
   abstractText?: InputMaybe<Scalars['String']['input']>;
+  acceptedAnswerId?: InputMaybe<Scalars['ID']['input']>;
   allowComment?: InputMaybe<Scalars['Boolean']['input']>;
   categoryId?: InputMaybe<Scalars['ID']['input']>;
   content?: InputMaybe<Scalars['String']['input']>;
@@ -512,6 +513,7 @@ export type UpdateLessonInput = {
 
 export type UpdateQuestionInput = {
   abstractText?: string | null | undefined;
+  acceptedAnswerId?: string | number | null | undefined;
   allowComment?: boolean | null | undefined;
   categoryId?: string | number | null | undefined;
   content?: string | null | undefined;
@@ -540,7 +542,7 @@ export type GetFeedQueryVariables = Exact<{
 }>;
 
 
-export type GetFeedQuery = { getFeed: { nextCursor: string | null, hasMore: boolean, items: Array<{ knowledgeId: string, type: KnowledgeType, ownerId: string, ownerName: string, ownerAvatarUrl: string | null, title: string, abstractText: string | null, thumbnailUrl: string | null, categoryId: string | null, categoryName: string | null, viewsCount: number, voteScore: number, commentCount: number, sourceCreatedAt: string, typeMeta:
+export type GetFeedQuery = { getFeed: { nextCursor: string | null, hasMore: boolean, items: Array<{ knowledgeId: string, type: KnowledgeType, ownerId: string, ownerName: string, ownerAvatarUrl: string | null, title: string, thumbnailUrl: string | null, categoryId: string | null, categoryName: string | null, viewsCount: number, voteScore: number, commentCount: number, sourceCreatedAt: string, allowComment: boolean, typeMeta:
         | { __typename: 'LessonFeedMeta', level: LessonLevel | null, estimateTimeInMinutes: number | null, contentMarkdown: string | null }
         | { __typename: 'QuestionFeedMeta', isResolved: boolean | null, acceptedAnswerId: string | null, content: string | null }
        | null }> } };
@@ -562,8 +564,8 @@ export type GetKnowledgeDetailQueryVariables = Exact<{
 
 
 export type GetKnowledgeDetailQuery = { knowledge:
-    | { __typename: 'Lesson', contentMarkdown: string | null, estimateTimeInMinutes: number | null, level: LessonLevel | null, id: string, title: string, type: KnowledgeType, abstractText: string | null, thumbnailUrl: string | null, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null, currentUserVote: number | null, category: { id: string, name: string } | null, owner: { id: string, username: string | null, avatarUrl: string | null }, comments: { hasMore: boolean, nextCursor: string | null, items: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, rootCommentId: string | null, replyToCommentId: string | null, replyToUserName: string | null, replyCount: number, createdAt: string, updatedAt: string | null }> } }
-    | { __typename: 'Question', content: string | null, isResolved: boolean, acceptedAnswerId: string | null, id: string, title: string, type: KnowledgeType, abstractText: string | null, thumbnailUrl: string | null, viewsCount: number, voteScore: number, commentCount: number, createdAt: string | null, currentUserVote: number | null, category: { id: string, name: string } | null, owner: { id: string, username: string | null, avatarUrl: string | null }, comments: { hasMore: boolean, nextCursor: string | null, items: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, rootCommentId: string | null, replyToCommentId: string | null, replyToUserName: string | null, replyCount: number, createdAt: string, updatedAt: string | null }> } }
+    | { __typename: 'Lesson', contentMarkdown: string | null, estimateTimeInMinutes: number | null, level: LessonLevel | null, id: string, title: string, type: KnowledgeType, abstractText: string | null, thumbnailUrl: string | null, viewsCount: number, voteScore: number, commentCount: number, allowComment: boolean, createdAt: string | null, currentUserVote: number | null, category: { id: string, name: string } | null, owner: { id: string, username: string | null, avatarUrl: string | null }, comments: { hasMore: boolean, nextCursor: string | null, items: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, rootCommentId: string | null, replyToCommentId: string | null, replyToUserName: string | null, replyCount: number, createdAt: string, updatedAt: string | null }> } }
+    | { __typename: 'Question', content: string | null, isResolved: boolean, acceptedAnswerId: string | null, id: string, title: string, type: KnowledgeType, abstractText: string | null, thumbnailUrl: string | null, viewsCount: number, voteScore: number, commentCount: number, allowComment: boolean, createdAt: string | null, currentUserVote: number | null, category: { id: string, name: string } | null, owner: { id: string, username: string | null, avatarUrl: string | null }, comments: { hasMore: boolean, nextCursor: string | null, items: Array<{ id: string, knowledgeId: string, userId: string, userName: string, userAvatarUrl: string | null, content: string, rootCommentId: string | null, replyToCommentId: string | null, replyToUserName: string | null, replyCount: number, createdAt: string, updatedAt: string | null }> } }
    | null };
 
 export type ListRootCommentsQueryVariables = Exact<{

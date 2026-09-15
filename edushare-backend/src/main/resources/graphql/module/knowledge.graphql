@@ -120,6 +120,7 @@ input UpdateQuestionInput {
     categoryId: ID
     content: String
     isResolved: Boolean
+    acceptedAnswerId : ID
 }
 
 input MyKnowledgeFilterInput {

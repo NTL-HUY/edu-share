@@ -14,6 +14,7 @@ public class FeedItemSpecification {
             List<Predicate> predicates = new ArrayList<>();
 
             predicates.add(cb.isTrue(root.get("isPublic")));
+            predicates.add(cb.isNull(root.get("deletedAt")));
 
             if (input.type() != null) {
                 predicates.add(cb.equal(root.get("type"), input.type()));

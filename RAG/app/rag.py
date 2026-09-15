@@ -1,79 +1,86 @@
-from datetime import datetime
 from typing import List, Optional
 
 from app import db
 from app.chunking import chunk_lesson, chunk_question
 from app.config import config
-from app.embedding import embed_texts, embed_one
-
-# eventType bên Spring publish dạng: LESSON_CREATED, LESSON_UPDATED, LESSON_DELETED,
-# QUESTION_CREATED, QUESTION_UPDATED, QUESTION_DELETED
-UPSERT_SUFFIXES = ("_CREATED", "_UPDATED")
-DELETE_SUFFIXES = ("_DELETED",)
-
-
-def parse_java_timestamp(arr) -> Optional[datetime]:
-    if not arr:
-        return None
-    y, mo, d, h, mi, s, *rest = arr
-    micro = (rest[0] // 1000) if rest else 0
-    return datetime(y, mo, d, h, mi, s, micro)
+from app.dto import (
+    KnowledgeCreatedEvent,
+    KnowledgeDeletedEvent,
+    KnowledgeUpdatedEvent,
+    LessonCreatedEvent,
+    QuestionCreatedEvent,
+    LessonUpdatedEvent,
+    QuestionUpdatedEvent,
+)
+from app.embedding import aembed_texts, aembed_one
 
 
-async def handle_knowledge_event(event: dict):
-    event_type = event.get("eventType", "")
-    knowledge_id = event.get("knowledgeId")
-
-    if knowledge_id is None:
-        print(f"[rag] Bỏ qua event thiếu knowledgeId: {event}")
+async def handle_knowledge_create_event(event: KnowledgeCreatedEvent):
+    if isinstance(event, LessonCreatedEvent):
+        chunks = chunk_lesson(event.contentMarkdown)
+    elif isinstance(event, QuestionCreatedEvent):
         return
-
-    if event_type.endswith(DELETE_SUFFIXES):
-        await db.delete_chunks_by_knowledge_id(knowledge_id)
-        print(f"[rag] Đã xoá chunk của knowledge_id={knowledge_id}")
-        return
-
-    if event_type.endswith(UPSERT_SUFFIXES):
-        await _process_upsert(event)
-        return
-
-    print(f"[rag] eventType không nhận diện được, bỏ qua: {event_type}")
-
-
-async def _process_upsert(event: dict):
-    knowledge_id = event["knowledgeId"]
-    knowledge_type = event.get("type")
-    title = event.get("title", "")
-    owner_id = event.get("ownerId")
-    is_public = event.get("isPublic", True)
-
-    if knowledge_type == "LESSON":
-        chunks = chunk_lesson(event.get("contentMarkdown", ""))
-    elif knowledge_type == "QUESTION":
-        chunks = chunk_question(
-            title=title,
-            abstract=event.get("abstractText", ""),
-            content=event.get("content", ""),
-        )
     else:
-        print(f"[rag] type không hỗ trợ: {knowledge_type}")
+        print(f"[rag] Không hỗ trợ loại event: {type(event).__name__}")
         return
 
     if not chunks:
-        print(f"[rag] knowledge_id={knowledge_id} không có nội dung để chunk, dừng")
+        print(f"[rag] knowledge_id={event.knowledgeId} không có nội dung để chunk, dừng")
         return
 
-    embeddings = embed_texts(chunks)
+    embeddings = await aembed_texts(chunks)
     await db.insert_chunks(
-        knowledge_id=knowledge_id,
-        knowledge_type=knowledge_type,
-        owner_id=owner_id,
-        is_public=is_public,
-        title=title,
+        knowledge_id=event.knowledgeId,
+        knowledge_type=event.type.value,
+        owner_id=event.ownerId,
+        is_public=event.isPublic,
+        title=event.title,
         chunks=chunks,
         embeddings=embeddings,
     )
-    print(f"[rag] Đã lưu {len(chunks)} chunk cho knowledge_id={knowledge_id}")
+    print(f"[rag] Đã lưu {len(chunks)} chunk cho knowledge_id={event.knowledgeId}")
+
+async def handle_knowledge_update_event(event: KnowledgeUpdatedEvent):
+    if isinstance(event, LessonUpdatedEvent):
+        chunks = chunk_lesson(event.contentMarkdown)
+    elif isinstance(event, QuestionUpdatedEvent):
+        if not event.isResolved:
+            print(f"[rag] Question knowledge_id={event.knowledgeId} chưa resolved, bỏ qua")
+            return
+        accepted_answer = await db.get_accepted_comment_content(
+            event.knowledgeId, event.acceptedAnswerId
+        )
+        chunks = chunk_question(
+            title=event.title,
+            abstract=event.abstractText or "",
+            content=event.content,
+            accepted_answer=accepted_answer,
+        )
+        print("chunkkkk",chunks)
+    else:
+        print(f"[rag] Không hỗ trợ loại event: {type(event).__name__}")
+        return
+
+    if not chunks:
+        print(f"[rag] knowledge_id={event.knowledgeId} không có nội dung để chunk, dừng")
+        return
+
+    embeddings = await aembed_texts(chunks)
+    await db.insert_chunks(
+        knowledge_id=event.knowledgeId,
+        knowledge_type=event.type.value,
+        owner_id=event.ownerId,
+        is_public=event.isPublic,
+        title=event.title,
+        chunks=chunks,
+        embeddings=embeddings,
+    )
+    print(f"[rag] Đã lưu {len(chunks)} chunk cho knowledge_id={event.knowledgeId}")
+
+
+async def handle_knowledge_delete_event(event: KnowledgeDeletedEvent):
+    await db.delete_chunks_by_knowledge_id(event.knowledgeId)
+    print(f"[rag] Đã xoá hẳn chunk của knowledge_id={event.knowledgeId}")
 
 
 async def retrieve_context(
@@ -83,7 +90,7 @@ async def retrieve_context(
     top_k: int = config.RAG_TOP_K,
     min_similarity: float = config.RAG_MIN_SIMILARITY,
 ):
-    query_embedding = embed_one(query)
+    query_embedding = await aembed_one(query)
     rows = await db.search_similar_chunks(
         query_embedding=query_embedding,
         top_k=top_k,

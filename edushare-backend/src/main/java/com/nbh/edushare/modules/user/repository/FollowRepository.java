@@ -1,5 +1,6 @@
 package com.nbh.edushare.modules.user.repository;
 
+import com.nbh.edushare.modules.user.dto.response.FollowCountProjection;
 import com.nbh.edushare.modules.user.dto.response.UserSimpleResponse;
 import com.nbh.edushare.modules.user.pojo.Follow;
 import com.nbh.edushare.modules.user.pojo.User;
@@ -16,7 +17,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     long countByFollowee_Id(Long followeeId);
     boolean existsByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
     Optional<Follow> findByFollowerIdAndFolloweeId(Long followerId, Long followeeId);
-
 
 
     @Query("SELECT f.follower FROM Follow f WHERE f.followee.id = :userId")
@@ -41,5 +41,8 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
           AND (f.followee.isFamous = false)
     """)
     List<Long> findNormalFolloweeIds(@Param("userId") Long userId);
+
+    @Query("SELECT f.followee.id, COUNT(f) FROM Follow f GROUP BY f.followee.id")
+    List<FollowCountProjection> countFollowersGroupedByFollowee();
 
 }

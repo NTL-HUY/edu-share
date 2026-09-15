@@ -55,6 +55,24 @@ async def delete_chunks_by_knowledge_id(knowledge_id: int):
     )
 
 
+async def get_accepted_comment_content(
+    knowledge_id: int, accepted_answer_id: Optional[int] = None
+) -> Optional[str]:
+    if accepted_answer_id is None:
+        return None
+    pool = get_pool()
+    row = await pool.fetchrow(
+        """
+        SELECT content
+        FROM comment
+        WHERE id = $1 AND knowledge_id = $2 AND deleted_at IS NULL
+        """,
+        accepted_answer_id,
+        knowledge_id,
+    )
+    return row["content"] if row else None
+
+
 async def insert_chunks(
     knowledge_id: int,
     knowledge_type: str,
@@ -69,13 +87,10 @@ async def insert_chunks(
     pool = get_pool()
     async with pool.acquire() as conn:
         async with conn.transaction():
-            # 1. BƯỚC BẮT BUỘC: Xóa SẠCH TOÀN BỘ chunk cũ của bài này trước
             await conn.execute(
                 "DELETE FROM knowledge_chunk WHERE knowledge_id = $1",
                 knowledge_id
             )
-
-            # 2. Chuẩn bị dữ liệu mới
             rows = [
                 (
                     knowledge_id,
@@ -125,3 +140,5 @@ async def search_similar_chunks(
         top_k,
     )
     return [dict(r) for r in rows]
+
+

@@ -112,7 +112,6 @@
       onUnfollow={handleUnfollow} />
 
    <!-- 2. TAB ACTIVITY CONTENT -->
-   <!-- {#if activeTab === 'activity'} -->
       <div class="flex flex-col gap-6 sm:flex-row">
          <!-- SUB-SIDEBAR BÊN TRÁI -->
          <ActivitySidebar />

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 public interface UserFeedRepository extends JpaRepository<UserFeed, UserFeedId> {
@@ -41,4 +42,13 @@ public interface UserFeedRepository extends JpaRepository<UserFeed, UserFeedId> 
 
     @Modifying
     long deleteByFeedItemId(Long feedItemId);
+
+    @Modifying
+    @Query("""
+        DELETE FROM UserFeed uf 
+        WHERE uf.feedItemId IN (
+            SELECT fi.knowledgeId FROM FeedItem fi WHERE fi.ownerId IN :ownerIds
+        )
+    """)
+    void deleteByOwnerIdIn(@Param("ownerIds") Collection<Long> ownerIds);
 }

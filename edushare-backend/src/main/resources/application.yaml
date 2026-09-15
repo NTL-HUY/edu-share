@@ -75,6 +75,14 @@ app:
   feed:
     cache-ttl-seconds: ${FEED_CACHE_TTL_SECONDS:30}
     discovery-cache-ttl-seconds: ${DISCOVERY_FEED_CACHE_TTL_SECONDS:30}
+  user:
+    famous:
+      up-threshold: 10000
+      down-threshold: 8000
+  job:
+    user:
+      famous-sync-cron: PT1H
+      famous-sycn-init-delay: PT30M
 
 chatbot:
   python-service:

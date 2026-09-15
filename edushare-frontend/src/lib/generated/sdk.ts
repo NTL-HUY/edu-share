@@ -44,7 +44,6 @@ export const GetFeedDocument = gql`
       ownerName
       ownerAvatarUrl
       title
-      abstractText
       thumbnailUrl
       categoryId
       categoryName
@@ -52,6 +51,7 @@ export const GetFeedDocument = gql`
       voteScore
       commentCount
       sourceCreatedAt
+      allowComment
       typeMeta {
         __typename
         ... on LessonFeedMeta {
@@ -125,6 +125,7 @@ export const GetKnowledgeDetailDocument = gql`
     viewsCount
     voteScore
     commentCount
+    allowComment
     createdAt
     currentUserVote
     owner {

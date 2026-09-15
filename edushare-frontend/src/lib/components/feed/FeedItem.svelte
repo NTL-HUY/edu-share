@@ -2,11 +2,11 @@
 	import type { FeedItem } from '$lib/generated/types';
 	import { isLessonFeedMeta, isQuestionFeedMeta } from '$lib/utils/checkTypeName';
 	import { formatTimeAgo } from '$lib/utils/time';
-	import { BookOpen, Clock1, HelpCircle } from 'lucide-svelte';
+	import { BookOpen, CircleCheck, Clock1, HelpCircle, Lock } from 'lucide-svelte';
 	import './feed-item.css';
 
 	let { feedItem }: { feedItem: FeedItem } = $props();
-	// console.log('feedItem in FeedItem.svelte:', feedItem);
+   
 </script>
 
 <div class="feed-item">
@@ -33,7 +33,14 @@
 						<HelpCircle class="h-3 w-3" />
 						QUESTION
 					</span>
-					<span class="badge badge-unresolved">Chờ lời giải</span>
+					{#if feedItem.typeMeta?.isResolved}
+						<span class="badge badge-resolved">
+							<CircleCheck class="h-3 w-3" />
+							Đã giải quyết
+						</span>
+					{:else}
+						<span class="badge badge-unresolved">Chờ lời giải</span>
+					{/if}
 				{/if}
 				{#if feedItem?.categoryId}
 					<span class="text-slate-400">•</span>
@@ -41,11 +48,17 @@
 						Danh mục: <strong>{feedItem.categoryName}</strong>
 					</span>
 				{/if}
+				{#if feedItem?.allowComment === false}
+					<span class="badge badge-locked">
+						<Lock class="h-3 w-3" />
+						Đã Tắt Bình Luận
+					</span>
+				{/if}
 			</div>
 			{#if isLessonFeedMeta(feedItem.typeMeta)}
 				<span class="read-time">
 					<Clock1 class="h-3.5 w-3.5" />
-					{feedItem.typeMeta?.estimateTimeInMinutes ?? 0} min read
+					{feedItem.typeMeta?.estimateTimeInMinutes ?? 0} phút đọc
 				</span>
 			{/if}
 		</div>
@@ -65,7 +78,7 @@
 				</p>
 			</div>
 
-			<!-- BỔ SUNG THUMBNAIL TẠI ĐÂY -->
+			<!--THUMBNAIL -->
 			{#if feedItem.thumbnailUrl}
 				<a href={`/feed/${feedItem.knowledgeId}`} class="thumbnail-wrapper">
 					<img src={feedItem.thumbnailUrl} alt={feedItem.title} class="thumbnail-img" />
@@ -85,8 +98,7 @@
 					alt={feedItem.ownerName}
 					class="avatar" />
 				<a href={`/profile/${feedItem.ownerName}`} class="author-name">{feedItem.ownerName}</a>
-				<!-- <span class="reputation">{feedItem.ownerReputation}</span> -->
-				<span>Dang:{formatTimeAgo(feedItem.sourceCreatedAt)}</span>
+				<span>{formatTimeAgo(feedItem.sourceCreatedAt)}</span>
 			</div>
 		</div>
 	</div>

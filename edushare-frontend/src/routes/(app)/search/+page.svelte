@@ -6,8 +6,9 @@
 	import type { PageData } from '../$types';
 
 	import '$lib/styles/base-feed.css';
+	import { categories, lessonLevels } from '$lib/stores/reference.store';
 	let { data }: { data: PageData } = $props();
-	// 1. Lấy giá trị từ URL Params
+
 	let query = $derived(page.url.searchParams.get('q') || '');
 	let currentType = $derived(page.url.searchParams.get('type') || '');
 	let currentCategory = $derived(page.url.searchParams.get('category') || '');
@@ -32,7 +33,6 @@
 		} else {
 			url.searchParams.delete(key);
 		}
-		// Đưa về trang đầu tiên mỗi khi đổi bộ lọc
 		if (key !== 'page') {
 			url.searchParams.set('page', '0');
 		}
@@ -46,8 +46,6 @@
 		if (q) url.searchParams.set('q', q);
 		goto(url.toString());
 	}
-
-	console.log('searchInput', searchInput);
 </script>
 
 <!-- TOP HEADER -->
@@ -60,17 +58,25 @@
 	</div>
 </div>
 
-<!-- TOP FILTER BAR (Nằm ngang thay vì cột bên trái) -->
+<!-- TOP FILTER BAR -->
 <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 py-3 text-xs">
 	<div class="flex flex-wrap items-center gap-2">
 		<div class="filter-tabs-group">
-			<button class="filter-tab-btn {currentType === '' ? 'filter-tab-btn-active' : ''}" onclick={() => updateFilter('type', null)}>Tất cả</button>
+			<button
+				class="filter-tab-btn {currentType === '' ? 'filter-tab-btn-active' : ''}"
+				onclick={() => updateFilter('type', null)}>
+				Tất cả
+			</button>
 
-			<button class="filter-tab-btn {currentType === 'LESSON' ? 'filter-tab-btn-active' : ''}" onclick={() => updateFilter('type', 'LESSON')}>
+			<button
+				class="filter-tab-btn {currentType === 'LESSON' ? 'filter-tab-btn-active' : ''}"
+				onclick={() => updateFilter('type', 'LESSON')}>
 				Bài học
 			</button>
 
-			<button class="filter-tab-btn {currentType === 'QUESTION' ? 'filter-tab-btn-active' : ''}" onclick={() => updateFilter('type', 'QUESTION')}>
+			<button
+				class="filter-tab-btn {currentType === 'QUESTION' ? 'filter-tab-btn-active' : ''}"
+				onclick={() => updateFilter('type', 'QUESTION')}>
 				Hỏi đáp
 			</button>
 		</div>
@@ -82,8 +88,9 @@
 				value={currentCategory}
 				onchange={(e) => updateFilter('category', e.currentTarget.value || null)}>
 				<option value="">Tất cả danh mục</option>
-				<option value="1">Java / Spring</option>
-				<option value="2">Frontend / Svelte</option>
+				{#each $categories as category}
+					<option value={category.id}>{category.name}</option>
+				{/each}
 			</select>
 		</div>
 
@@ -94,9 +101,9 @@
 				value={currentLevel}
 				onchange={(e) => updateFilter('level', e.currentTarget.value || null)}>
 				<option value="">Tất cả trình độ</option>
-				<option value="BEGINNER">Cơ bản</option>
-				<option value="INTERMEDIATE">Trung cấp</option>
-				<option value="ADVANCED">Nâng cao</option>
+				{#each $lessonLevels as lessonLevel}
+					<option value={lessonLevel.code}>{lessonLevel.displayName}</option>
+				{/each}
 			</select>
 		</div>
 
@@ -116,7 +123,7 @@
 		</select>
 	</div>
 </div>
-<!-- MAIN LIST (Rộng rãi hoàn toàn) -->
+<!-- MAIN LIST -->
 <main class="divide-y divide-gray-200 border-b border-gray-200">
 	{#each data.feed?.items as f}
 		<FeedItem feedItem={f} />

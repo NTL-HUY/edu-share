@@ -6,7 +6,7 @@
 	import { formatTimeAgo } from '$lib/utils/time';
 	import MarkdownContent from '$lib/components/feed/MarkdownContent.svelte';
 	import { page } from '$app/state';
-	
+
 	import type { FeedPageData } from './+page.server';
 
 	import VoteSidebar from './_components/VoteSidebar.svelte';
@@ -18,7 +18,7 @@
 
 	let currentUser = $derived(page.data?.user);
 	let feedItem = $derived(data.knowledge);
-	let comments = $derived(feedItem?.comments);
+	// let comments = $derived(feedItem?.comments);
 
 	const commentState = createCommentState(
 		feedItem?.id ?? '',
@@ -66,7 +66,10 @@
 				<div class="flex items-center gap-4 text-gray-500">
 					<span class="flex items-center gap-1"><Eye size={14} /> {feedItem?.viewsCount} lượt xem</span>
 					{#if isLesson(feedItem)}
-						<span class="flex items-center gap-1"><Clock size={14} /> {feedItem?.estimateTimeInMinutes ?? 0} phút đọc</span>
+						<span class="flex items-center gap-1">
+							<Clock size={14} />
+							{feedItem?.estimateTimeInMinutes ?? 0} phút đọc
+						</span>
 					{/if}
 				</div>
 			</div>
@@ -96,44 +99,51 @@
 				<span class="ml-1 text-xs font-normal text-gray-500">({feedItem?.commentCount ?? 0} bình luận)</span>
 			</h3>
 		</div>
+		{#if feedItem?.allowComment !== false}
+			<!-- Form Bình luận -->
+			<div class="mt-4 flex gap-3">
+				<img
+					src={currentUser?.avatarUrl ??
+						`https://ui-avatars.com/api/?name=${currentUser?.username ?? 'User'}&background=6366F1&color=fff`}
+					alt="Avatar"
+					class="h-8 w-8 shrink-0 rounded-full" />
 
-		<!-- Form Bình luận -->
-		<div class="mt-4 flex gap-3">
-			<img
-				src={currentUser?.avatarUrl ?? `https://ui-avatars.com/api/?name=${currentUser?.username ?? 'User'}&background=6366F1&color=fff`}
-				alt="Avatar"
-				class="h-8 w-8 shrink-0 rounded-full" />
+				<div class="flex-1 space-y-2">
+					{#if commentState.replyingTo}
+						<div class="flex items-center justify-between rounded-md bg-orange-50 px-3 py-1.5 text-xs text-orange-700">
+							<span>
+								Đang trả lời <strong class="font-semibold">@{commentState.replyingTo.userName}</strong>
+							</span>
+							<button
+								type="button"
+								onclick={() => (commentState.replyingTo = null)}
+								class="font-bold text-orange-500 hover:text-orange-800">
+								✕ Hủy
+							</button>
+						</div>
+					{/if}
 
-			<div class="flex-1 space-y-2">
-				{#if commentState.replyingTo}
-					<div class="flex items-center justify-between rounded-md bg-orange-50 px-3 py-1.5 text-xs text-orange-700">
-						<span>
-							Đang trả lời <strong class="font-semibold">@{commentState.replyingTo.userName}</strong>
-						</span>
-						<button type="button" onclick={() => (commentState.replyingTo = null)} class="font-bold text-orange-500 hover:text-orange-800">
-							✕ Hủy
+					<textarea
+						bind:value={commentState.content}
+						rows="3"
+						placeholder="Viết bình luận hoặc đặt câu hỏi..."
+						class="w-full rounded-lg border border-gray-300 p-3 text-xs transition focus:border-orange-500 focus:outline-none">
+					</textarea>
+
+					<div class="flex justify-end">
+						<button
+							type="button"
+							disabled={commentState.isSubmitting || !commentState.content.trim()}
+							onclick={commentState.sendComment}
+							class="rounded-md bg-orange-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-orange-700 disabled:opacity-50">
+							{commentState.isSubmitting ? 'Đang gửi...' : 'Gửi bình luận'}
 						</button>
 					</div>
-				{/if}
-
-				<textarea
-					bind:value={commentState.content}
-					rows="3"
-					placeholder="Viết bình luận hoặc đặt câu hỏi..."
-					class="w-full rounded-lg border border-gray-300 p-3 text-xs transition focus:border-orange-500 focus:outline-none">
-				</textarea>
-
-				<div class="flex justify-end">
-					<button
-						type="button"
-						disabled={commentState.isSubmitting || !commentState.content.trim()}
-						onclick={commentState.sendComment}
-						class="rounded-md bg-orange-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-orange-700 disabled:opacity-50">
-						{commentState.isSubmitting ? 'Đang gửi...' : 'Gửi bình luận'}
-					</button>
 				</div>
 			</div>
-		</div>
+		{:else}
+			<div class="mt-4 rounded-lg bg-gray-50 p-3 text-center text-xs text-gray-500">Chủ bài viết đã tắt bình luận.</div>
+		{/if}
 
 		<!-- Danh sách Bình luận -->
 		<div class="mt-4 space-y-4 divide-y divide-gray-100">
@@ -144,8 +154,7 @@
 						ownerUsername={feedItem?.owner.username}
 						onReply={(target) => (commentState.replyingTo = target)}
 						replyState={commentState.getReplyState(comment.id)}
-						onToggleReplies={commentState.toggleReplies}
-						/>
+						onToggleReplies={commentState.toggleReplies} />
 				{/each}
 				{#if commentState.hasMore}
 					<div class="pt-4 text-center">
@@ -159,7 +168,9 @@
 					</div>
 				{/if}
 			{:else}
-				<p class="pt-6 text-center text-xs text-gray-400 italic">Chưa có bình luận nào. Hãy là người đầu tiên thảo luận!</p>
+				<p class="pt-6 text-center text-xs text-gray-400 italic">
+					Chưa có bình luận nào. Hãy là người đầu tiên thảo luận!
+				</p>
 			{/if}
 		</div>
 	</section>
