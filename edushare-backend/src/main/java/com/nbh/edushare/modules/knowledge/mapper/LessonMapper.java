@@ -14,7 +14,6 @@ import org.mapstruct.*;
 public interface LessonMapper {
 
     @Mapping(target = "type", constant = "LESSON")
-        // ép cứng type cho entity con Lesson
     Lesson toEntity(CreateLessonCommand command);
 
     LessonDetailResponse toDetailResponse(Lesson lesson);

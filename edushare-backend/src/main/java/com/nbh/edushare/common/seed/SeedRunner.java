@@ -25,6 +25,7 @@ public class SeedRunner implements CommandLineRunner {
             ScriptUtils.executeSqlScript(conn, new ClassPathResource("db/seed_user.sql"));
             ScriptUtils.executeSqlScript(conn, new ClassPathResource("db/seed_category.sql"));
             ScriptUtils.executeSqlScript(conn, new ClassPathResource("db/seed_chat.sql"));
+            ScriptUtils.executeSqlScript(conn, new ClassPathResource("db/seed_knowledge_feed.sql"));
         }
     }
 }

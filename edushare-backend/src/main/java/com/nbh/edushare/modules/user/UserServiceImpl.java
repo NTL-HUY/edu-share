@@ -8,6 +8,7 @@ import com.nbh.edushare.modules.user.dto.response.UserAuthInfo;
 import com.nbh.edushare.modules.user.dto.response.UserProfileResponse;
 import com.nbh.edushare.modules.user.dto.response.UserSimpleResponse;
 import com.nbh.edushare.modules.user.enums.UserRole;
+import com.nbh.edushare.modules.user.event.UserProfileChangedEvent;
 import com.nbh.edushare.modules.user.exception.UserErrorCode;
 import com.nbh.edushare.modules.user.pojo.Profile;
 import com.nbh.edushare.modules.user.pojo.User;
@@ -15,6 +16,7 @@ import com.nbh.edushare.modules.user.repository.FollowRepository;
 import com.nbh.edushare.modules.user.repository.ProfileRepository;
 import com.nbh.edushare.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ class UserServiceImpl implements UserService {
     private final FollowRepository followRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional
@@ -137,8 +140,12 @@ class UserServiceImpl implements UserService {
 
         userMapper.updateUserFromRequest(request, user);
         userMapper.updateProfileFromRequest(request, profile);
+        ProfileResponse response = userMapper.toProfileResponse(user, profile, true, false);
 
-        return userMapper.toProfileResponse(user, profile, true, false);
+        applicationEventPublisher.publishEvent(new UserProfileChangedEvent(
+                user.getId(), user.getFullName(), user.getAvatarUrl()));
+
+        return response;
     }
 
 }

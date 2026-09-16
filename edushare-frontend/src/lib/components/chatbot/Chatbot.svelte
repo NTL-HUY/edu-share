@@ -17,7 +17,6 @@
 	let loading = $state(false);
 	let chatContainer: HTMLDivElement | null = $state(null);
 
-	// Tự động scroll xuống cuối khi có tin nhắn mới
 	$effect(() => {
 		if (messages.length && chatContainer) {
 			chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -28,13 +27,11 @@
 		const query = inputQuery.trim();
 		if (!query || loading) return;
 
-		// Append user message
 		messages = [...messages, { sender: 'user', text: query }];
 		inputQuery = '';
 		loading = true;
 
 		try {
-			// Trỏ tới endpoint FastAPI của bạn
 			const response = await fetch('/api/chat', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -69,7 +66,7 @@
 </script>
 
 <!-- Floating Toggle Button -->
-<div class="fixed right-6 bottom-20 z-50">
+<div class="fixed right-6 bottom-40 z-50">
 	{#if !isOpen}
 		<button
 			onclick={() => (isOpen = true)}

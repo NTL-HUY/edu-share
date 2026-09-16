@@ -10,7 +10,6 @@ export const actions : Actions = {
   default: async ({ request, cookies, fetch }) => {
     const formData = Object.fromEntries(await request.formData());
 
-    // === 1. Validate phía client-facing (Zod) trước khi gọi Spring ===
     const parsed = loginSchema.safeParse(formData);
     if (!parsed.success) {
       return fail(400, {
@@ -19,10 +18,8 @@ export const actions : Actions = {
       });
     }
 
-    // === 2. Gọi Spring qua authService ===
     const result = await authService.login(fetch, parsed.data);
 
-    // === 3. Lỗi nghiệp vụ / server — message + fieldErrors lấy thẳng từ Spring ===
     if (!result.ok) {
       return fail(result.status, {
         error: result.message,

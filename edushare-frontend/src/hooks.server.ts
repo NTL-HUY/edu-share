@@ -34,8 +34,8 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	if (accessToken) {
 		request.headers.set('Authorization', `Bearer ${accessToken}`);
 	}
-	console.log('Request URL:', request.url);
-	console.log('Access Token:', accessToken);
+	// console.log('Request URL:', request.url);
+	// console.log('Access Token:', accessToken);
 
 	const clonedForRetry = request.clone();
 	let response = await fetch(request);

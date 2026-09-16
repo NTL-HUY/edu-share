@@ -28,7 +28,6 @@ public class CounterFlushScheduler {
 
     @Scheduled(fixedDelayString = "${app.counter.flush.fixed-delay-ms:5000}")
     public void flushDirtyCounters() {
-        // Chống nhiều instance app cùng flush trùng nhau
         Boolean locked = redis.opsForValue()
                 .setIfAbsent(LOCK_KEY, instanceId, Duration.ofSeconds(10));
         if (locked == null || !locked) return;
@@ -44,7 +43,6 @@ public class CounterFlushScheduler {
                     redis.opsForSet().remove(RedisCounterConstants.DIRTY_SET_KEY, idStr);
                 } catch (Exception e) {
                     log.error("Flush counter thất bại cho knowledge_id={}", knowledgeId, e);
-                    // không remove khỏi dirty set -> lần sau retry lại
                 }
             }
         } finally {

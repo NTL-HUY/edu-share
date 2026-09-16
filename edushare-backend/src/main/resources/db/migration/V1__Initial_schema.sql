@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT chk_users_role CHECK (user_role IN ('USER', 'ADMIN'))
 );
 
--- Partial Unique Indexes (Cho phép Unique nhưng bỏ qua các bản ghi đã xóa soft-delete)
 CREATE UNIQUE INDEX uk_users_username ON users (username) WHERE deleted_at IS NULL;
 CREATE UNIQUE INDEX uk_users_email ON users (email) WHERE deleted_at IS NULL;
 

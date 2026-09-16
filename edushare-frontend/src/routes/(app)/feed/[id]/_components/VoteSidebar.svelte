@@ -1,4 +1,3 @@
-<!-- src/routes/feed/[id]/_components/VoteSidebar.svelte -->
 <script lang="ts">
 	import { ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { toast } from 'svelte-sonner';

@@ -1,4 +1,3 @@
-<!-- src/routes/feed/[id]/+page.svelte -->
 <script lang="ts">
 	import '$lib/components/feed/feed-item.css';
 	import { Eye, Clock, HelpCircle, BookOpen } from 'lucide-svelte';
@@ -18,7 +17,6 @@
 
 	let currentUser = $derived(page.data?.user);
 	let feedItem = $derived(data.knowledge);
-	// let comments = $derived(feedItem?.comments);
 
 	const commentState = createCommentState(
 		feedItem?.id ?? '',
@@ -56,10 +54,11 @@
 
 			<div class="mt-4 flex items-center justify-between text-xs text-gray-500">
 				<div class="flex items-center gap-2">
-					<img
-						src="https://ui-avatars.com/api/?name={feedItem?.owner.username}&background=0D8ABC&color=fff"
-						alt="{feedItem?.owner.username}'s avatar"
-						class="h-7 w-7 rounded-full" />
+					<img id="dady"
+						src={feedItem?.owner.avatarUrl ||
+							`https://ui-avatars.com/api/?name=${encodeURIComponent(feedItem?.owner?.username || 'User')}&background=0D8ABC&color=fff`}
+						alt="{feedItem?.owner?.username || 'User'}'s avatar"
+						class="h-7 w-7 rounded-full object-cover" />
 					<span class="font-semibold text-gray-700">{feedItem?.owner.username}</span>
 					<span>• Đăng ngày {formatTimeAgo(feedItem?.createdAt)}</span>
 				</div>

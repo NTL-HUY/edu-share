@@ -14,7 +14,6 @@ import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    // Trang comment gốc của 1 bài, dùng đúng index idx_comment_knowledge_root_created
     @Query("""
             SELECT c FROM Comment c 
             WHERE c.knowledgeId = :knowledgeId 
@@ -42,7 +41,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
                     Pageable pageable
             );
 
-    // Lấy toàn bộ reply theo 1 root, sắp theo thời gian tạo
     List<Comment> findByKnowledgeIdAndRootCommentIdAndDeletedAtIsNullOrderByCreatedAtAsc(
             Long knowledgeId, Long rootCommentId);
 
@@ -51,5 +49,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Modifying
     @Query("UPDATE Comment c SET c.replyCount = c.replyCount + :delta WHERE c.id = :rootId")
     void adjustReplyCount(@Param("rootId") Long rootId, @Param("delta") int delta);
+
+    @Modifying
+    @Query("UPDATE Comment c SET c.userName = :userName, c.userAvatarUrl = :userAvatarUrl "
+          + "WHERE c.userId = :userId")
+    int syncUserInfo(@Param("userId") Long userId,
+                             @Param("userName") String userName,
+                     @Param("userAvatarUrl") String userAvatarUrl);
 
 }

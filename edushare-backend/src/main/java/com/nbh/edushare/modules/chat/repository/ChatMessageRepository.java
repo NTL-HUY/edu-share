@@ -3,6 +3,7 @@ package com.nbh.edushare.modules.chat.repository;
 import com.nbh.edushare.modules.chat.pojo.ChatMessage;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,4 +23,11 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     );
 
     boolean existsByClientTempIdAndUserId(String clientTempId, Long userId);
+
+    @Modifying
+    @Query("UPDATE ChatMessage m SET m.userName = :userName, m.userAvatarUrl = :userAvatarUrl "
+          + "WHERE m.userId = :userId")
+    int syncUserInfo(@Param("userId") Long userId,
+                     @Param("userName") String userName,
+                     @Param("userAvatarUrl") String userAvatarUrl);
 }

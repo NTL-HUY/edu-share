@@ -30,25 +30,3 @@ export const PUT: RequestHandler = async ({ params, request, fetch }) => {
 };
 
 
-// export const POST: RequestHandler = async (event) => {
-//    const { knowledgeId, page } = await event.request.json();
-//    const sdk = createSdk(event.fetch);
-
-//    try {
-//       const data = await sdk.ListRootComments({
-//          knowledgeId,
-//          input: { number: page, size: 2, sort: 'id,desc' }
-//       });
-
-//       return json({ 
-//          success: true, 
-//          comments: data.listRootComments 
-//       });
-//    } catch (err: any) {
-//       const gqlError = err?.response?.errors?.[0] || err?.errors?.[0];
-//       return json(
-//          { success: false, message: gqlError?.message || 'Không thể tải thêm bình luận' },
-//          { status: 400 }
-//       );
-//    }
-// };

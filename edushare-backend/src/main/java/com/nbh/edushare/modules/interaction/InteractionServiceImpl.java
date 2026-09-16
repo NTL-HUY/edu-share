@@ -49,7 +49,6 @@ public class InteractionServiceImpl implements InteractionService {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    // ================= COMMENT =================
 
     @Transactional
     @Override
@@ -202,10 +201,9 @@ public class InteractionServiceImpl implements InteractionService {
         if (existing.isPresent()) {
             Vote v = existing.get();
             if (v.getValue() == newValue) {
-                // vote lại đúng giá trị cũ -> không đổi gì
                 return new VoteResponse(knowledgeId, newValue, currentScore(knowledgeId));
             }
-            delta = newValue - v.getValue(); // vd: từ -1 -> +1 thì delta = +2
+            delta = newValue - v.getValue();
             v.setValue(newValue);
             voteRepository.save(v);
         } else {
@@ -214,11 +212,10 @@ public class InteractionServiceImpl implements InteractionService {
                     .userId(userId)
                     .value(newValue)
                     .build();
-            voteRepository.save(v); // unique constraint (user_id, knowledge_id) bảo vệ double-vote
+            voteRepository.save(v);
             delta = newValue;
         }
 
-        // vote_score của bài viết: đi qua Redis, KHÔNG update trực tiếp knowledge ở đây
         eventPublisher.publishEvent(new VoteChangedEvent(knowledgeId, delta));
 
         return new VoteResponse(knowledgeId, newValue, currentScore(knowledgeId));

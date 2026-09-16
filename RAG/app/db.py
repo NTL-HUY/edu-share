@@ -10,7 +10,6 @@ DB_NAME = os.getenv("DB_NAME", "edushare")
 DB_USERNAME = os.getenv("DB_USERNAME", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
 
-# Ghép thành chuỗi DSN chuẩn cho asyncpg
 DB_DSN = f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 pool: Optional[asyncpg.Pool] = None
@@ -21,8 +20,6 @@ async def init_pool():
         return pool
 
     async def init_connection(conn: asyncpg.Connection):
-        # Đăng ký codec để asyncpg hiểu kiểu vector <-> list[float] đăng ký register_vector để hiểu cách đổi mảng
-        # list[float] trong Python thành vector trong Postgres
         await register_vector(conn)
 
     pool = await asyncpg.create_pool(

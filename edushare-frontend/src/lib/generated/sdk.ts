@@ -44,6 +44,7 @@ export const GetFeedDocument = gql`
       ownerName
       ownerAvatarUrl
       title
+      abstractText
       thumbnailUrl
       categoryId
       categoryName
@@ -348,6 +349,11 @@ export const UpdateLessonDocument = gql`
   }
 }
     `;
+export const DeleteKnowledgeDocument = gql`
+    mutation DeleteKnowledge($id: ID!) {
+  deleteKnowledge(id: $id)
+}
+    `;
 export const KnowledgeListByUsernameDocument = gql`
     query KnowledgeListByUsername($username: String!, $input: MyKnowledgeFilterInput) {
   knowledgeListByUsername(username: $username, input: $input) {
@@ -436,6 +442,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     UpdateLesson(variables: Types.UpdateLessonMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<Types.UpdateLessonMutation> {
       return withWrapper((wrappedRequestHeaders) => client.request<Types.UpdateLessonMutation>({ document: UpdateLessonDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'UpdateLesson', 'mutation', variables);
+    },
+    DeleteKnowledge(variables: Types.DeleteKnowledgeMutationVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<Types.DeleteKnowledgeMutation> {
+      return withWrapper((wrappedRequestHeaders) => client.request<Types.DeleteKnowledgeMutation>({ document: DeleteKnowledgeDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'DeleteKnowledge', 'mutation', variables);
     },
     KnowledgeListByUsername(variables: Types.KnowledgeListByUsernameQueryVariables, requestHeaders?: GraphQLClientRequestHeaders, signal?: RequestInit['signal']): Promise<Types.KnowledgeListByUsernameQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<Types.KnowledgeListByUsernameQuery>({ document: KnowledgeListByUsernameDocument, variables, requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders }, signal }), 'KnowledgeListByUsername', 'query', variables);

@@ -2,7 +2,7 @@ import { API_ENDPOINTS } from "$lib/configs/api";
 import { apiRequest, apiUploadRequest, type ApiResult } from "./base.service";
 
 export interface MediaUploadResponse {
-   url: string; // Hoặc field tương ứng từ Server trả về
+   url: string; 
 }
 
 export const mediaService = {

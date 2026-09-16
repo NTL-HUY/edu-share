@@ -12,10 +12,6 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class CounterServiceImpl implements CounterService {
-
-    // QUAN TRỌNG: dùng StringRedisTemplate (chuỗi thô), KHÔNG dùng
-    // RedisTemplate<String,Object> đang cấu hình JSON serializer trong RedisConfig,
-    // vì HINCRBY yêu cầu value là số dạng string thuần, không phải JSON.
     private final StringRedisTemplate redis;
     private final FeedService feedService;
     private final KnowledgeService knowledgeService;

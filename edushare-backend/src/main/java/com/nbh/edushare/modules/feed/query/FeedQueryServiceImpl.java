@@ -69,7 +69,7 @@ public class FeedQueryServiceImpl implements FeedQueryService {
                 .toList();
 
         boolean hasMore = sorted.size() > limit;
-        List<FeedItem> finalList = hasMore ? sorted.subList(0, limit) : sorted;
+        List<FeedItem> finalList = new ArrayList<>(hasMore ? sorted.subList(0, limit) : sorted);
 
         String nextCursor = finalList.isEmpty() ? null
                 : new FeedCursor(
@@ -90,7 +90,7 @@ public class FeedQueryServiceImpl implements FeedQueryService {
                 : feedItemRepository.findOlderPublicDiscovery(List.of(-1L), cursor.createdAt(), cursor.id(), pageable);
 
         boolean hasMore = discovery.size() > limit;
-        List<FeedItem> finalList = hasMore ? discovery.subList(0, limit) : discovery;
+        List<FeedItem> finalList = new ArrayList<>(hasMore ? discovery.subList(0, limit) : discovery);
 
         String nextCursor = finalList.isEmpty() ? null
                 : new FeedCursor(

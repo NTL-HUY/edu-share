@@ -32,11 +32,14 @@ class Config:
     def ACTIVE_MODEL_NAME(self) -> str:
         return self.JINA_MODEL if self.EMBEDDING_PROVIDER == "jina" else self.LOCAL_MODEL
 
-    # --- Ollama & Embedding ---
-    OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
+    # --- Ollama ---
+    OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434")
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
     # MODEL_NAME: str = os.getenv("MODEL_NAME", "./pretrained_models/vietnamese-bi-encoder")
 
+    # --- Gemini ---
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", "gemini:gemini-3.6-flash")
     # --- Kafka ---
     KAFKA_BOOTSTRAP: str = os.getenv("KAFKA_BOOTSTRAP", "localhost:9092")
     KNOWLEDGE_CREATED_TOPIC: str = os.getenv("KNOWLEDGE_CREATED_TOPIC", "knowledge-created")

@@ -21,17 +21,14 @@ class MediaStorageServiceImpl implements MediaStorageService {
     @Override
     public UploadResult upload(MultipartFile file, String folder) {
 
-        // check 1: rỗng
         if (file.isEmpty()) {
             throw new AppException(MediaErrorCode.FILE_IS_EMPTY);
         }
 
-        // check 2: quá to
-        if (file.getSize() > 5 * 1024 * 1024) { // 5MB
+        if (file.getSize() > 5 * 1024 * 1024) {
             throw new AppException(MediaErrorCode.FILE_TOO_LARGE);
         }
 
-        // check 3: đúng loại ảnh
         String contentType = file.getContentType();
         if (!"image/jpeg".equals(contentType) && !"image/png".equals(contentType)) {
             throw new AppException(MediaErrorCode.UNSUPPORTED_FILE_TYPE);
@@ -41,7 +38,7 @@ class MediaStorageServiceImpl implements MediaStorageService {
             Map<?, ?> result = cloudinary.uploader().upload(
                     file.getBytes(),
                     ObjectUtils.asMap(
-                            "folder", folder,           // vd: "knowledge/thumbnails"
+                            "folder", folder,
                             "resource_type", "image"
                     )
             );

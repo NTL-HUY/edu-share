@@ -16,14 +16,13 @@
 	async function toggleVisibility(id: string) {
 		const item = list.items.find((i) => i.id === id);
 		if (!item) return;
-		list.updateItem(id, { isPublic: !item.isPublic }); // optimistic
+		list.updateItem(id, { isPublic: !item.isPublic }); 
 		// gọi mutation thật ở đây, rollback nếu lỗi
 	}
 
-	async function deleteItem(id: string) {
+async function deleteItem(id: string) {
 		if (!confirm('Xoá mục này?')) return;
-		list.removeItem(id); // optimistic
-		// gọi mutation deleteKnowledge(id) thật ở đây
+		await list.deleteItem(id);
 	}
 </script>
 

@@ -86,55 +86,37 @@ CREATE INDEX idx_feed_item_created
     ON feed_item (source_created_at DESC, knowledge_id DESC)
     WHERE deleted_at IS NULL AND is_public = TRUE;
 
--- Cho search filter theo type
 CREATE INDEX idx_feed_item_type ON feed_item (type) WHERE deleted_at IS NULL;
 
--- Cho search filter theo category
 CREATE INDEX idx_feed_item_category ON feed_item (category_id) WHERE deleted_at IS NULL;
 
--- Cho search filter theo level (nằm trong JSONB)
 CREATE INDEX idx_feed_item_level ON feed_item ((type_meta->>'level')) WHERE deleted_at IS NULL;
 
---
--- -- Full-text search (đã nói ở tin trước)
--- ALTER TABLE feed_item ADD COLUMN search_vector tsvector
---     GENERATED ALWAYS AS (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(abstract,''))) STORED;
--- CREATE INDEX idx_feed_item_search_vector ON feed_item USING GIN (search_vector);
 
-
--- Bật extension pgvector (chạy 1 lần, cần quyền superuser hoặc user có quyền CREATE EXTENSION)
 CREATE EXTENSION IF NOT EXISTS vector;
 
--- =====================================================
--- knowledge_chunk: bảng lưu chunk + embedding, dùng cho RAG
--- Đây là bảng "read model" riêng của Python service, giống tinh thần
--- fan-out của feed_item bên Spring: denormalize sẵn owner_id/is_public
--- để lúc retrieval khỏi phải join sang DB gốc.
--- =====================================================
+
 CREATE TABLE IF NOT EXISTS knowledge_chunk (
-    id              BIGSERIAL PRIMARY KEY,
-    knowledge_id    BIGINT NOT NULL,
-    knowledge_type  VARCHAR(20) NOT NULL,   -- LESSON | QUESTION
-    owner_id        BIGINT NOT NULL,
-    is_public       BOOLEAN NOT NULL DEFAULT TRUE,
-    title           VARCHAR(255) NOT NULL,
-    chunk_index     INT NOT NULL,
-    content         TEXT NOT NULL,
-    embedding       vector(768) NOT NULL,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id BIGSERIAL PRIMARY KEY,
+    knowledge_id BIGINT NOT NULL,
+    knowledge_type VARCHAR(20) NOT NULL,   -- LESSON | QUESTION
+    owner_id BIGINT NOT NULL,
+    is_public BOOLEAN NOT NULL DEFAULT TRUE,
+    title VARCHAR(255) NOT NULL,
+    chunk_index INT NOT NULL,
+    content TEXT NOT NULL,
+    embedding vector(768) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uk_knowledge_chunk_idx UNIQUE (knowledge_id, chunk_index),
     CONSTRAINT chk_knowledge_chunk_type CHECK (knowledge_type IN ('LESSON', 'QUESTION'))
 );
 
--- Xoá hết chunk theo knowledge_id (khi UPDATED/DELETED)
 CREATE INDEX IF NOT EXISTS idx_knowledge_chunk_knowledge_id
     ON knowledge_chunk (knowledge_id);
 
--- Vector search (HNSW, cosine distance)
 CREATE INDEX IF NOT EXISTS idx_knowledge_chunk_embedding
     ON knowledge_chunk USING hnsw (embedding vector_cosine_ops);
 
--- Lọc nhanh theo quyền xem trước khi tính khoảng cách vector
 CREATE INDEX IF NOT EXISTS idx_knowledge_chunk_visibility
     ON knowledge_chunk (is_public, owner_id);

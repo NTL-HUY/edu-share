@@ -22,7 +22,6 @@
 			? 'bg-slate-100 font-bold text-slate-900'
 			: 'text-slate-600 hover:bg-slate-50'}">
 		<span class="flex items-center gap-2"><BookOpen class="h-3.5 w-3.5" /> Bài đăng</span>
-		<span class="rounded bg-slate-200 px-1.5 py-0.5 text-[10px]">{sidebarState.counts.lessons}</span>
 	</button>
 
 
@@ -32,8 +31,7 @@
 		'followers'
 			? 'bg-slate-100 font-bold text-slate-900'
 			: 'text-slate-600 hover:bg-slate-50'}">
-		<span class="flex items-center gap-2"><UserCheck class="h-3.5 w-3.5" /> Followers</span>
-		<span class="rounded bg-slate-200 px-1.5 py-0.5 text-[10px]">{sidebarState.counts.followers}</span>
+		<span class="flex items-center gap-2"><UserCheck class="h-3.5 w-3.5" /> Người theo dõi</span>
 	</button>
 
 	<button
@@ -42,8 +40,7 @@
 		'following'
 			? 'bg-slate-100 font-bold text-slate-900'
 			: 'text-slate-600 hover:bg-slate-50'}">
-		<span class="flex items-center gap-2"><UserPlus class="h-3.5 w-3.5" /> Following</span>
-		<span class="rounded bg-slate-200 px-1.5 py-0.5 text-[10px]">{sidebarState.counts.following}</span>
+		<span class="flex items-center gap-2"><UserPlus class="h-3.5 w-3.5" /> Đang theo dõi</span>
 	</button>
 
 </div>

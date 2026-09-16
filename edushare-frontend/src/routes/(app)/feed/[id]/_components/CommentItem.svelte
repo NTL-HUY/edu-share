@@ -1,4 +1,3 @@
-<!-- src/routes/feed/[id]/_components/CommentItem.svelte -->
 <script lang="ts">
 	import { formatTimeAgo } from '$lib/utils/time';
 	type Props = {

@@ -31,8 +31,6 @@ export const load: PageServerLoad = async (event) => {
 		};
 	} catch (err) {
 		console.error('Search feed error:', err);
-		// 1. Nếu là lỗi từ GraphQL Server (GraphQLError / ClientError)
-		// SDK (như graphql-request hay urql) thường nhét mảng `response.errors` vào `err`
 		if (err?.response?.errors && err.response.errors.length > 0) {
 			const firstError = err.response.errors[0];
 			return {
@@ -44,7 +42,6 @@ export const load: PageServerLoad = async (event) => {
 			};
 		}
 
-		// 2. Lỗi mạng hoặc Server sập hoàn toàn
 		return {
 			feed: null,
 			error: {

@@ -21,9 +21,6 @@ public interface UserService {
     List<Long> findFamousFolloweeIds(Long userId);
     List<Long> findNormalFolloweeIds(Long userId);
 
-
-//    ProfileResponse getProfile(String username);
-
     ProfileResponse getMyProfile(Long currentUserId);
 
     ProfileResponse getProfileByUsername(String targetUsername, Long currentUserId);

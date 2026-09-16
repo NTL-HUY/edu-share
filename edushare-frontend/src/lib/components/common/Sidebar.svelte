@@ -32,7 +32,6 @@
 	}
 </script>
 
-<!-- Phần HTML bị thiếu khiến Sidebar không hiển thị -->
 <aside class="w-52 shrink-0">
 	<nav class="flex h-full flex-col gap-1 border-r border-gray-200 bg-white p-2 text-gray-700">
 		{#each navItems as item}

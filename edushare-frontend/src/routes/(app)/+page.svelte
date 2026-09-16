@@ -18,7 +18,7 @@
 		if (!hasMore || loading) return;
 		loading = true;
 		try {
-			const response = await fetch(`/?cursor=${cursor}&limit=2`);
+			const response = await fetch(`/?cursor=${cursor}&limit=10`);
 			const result = await response.json();
 
 			if (result?.items) {

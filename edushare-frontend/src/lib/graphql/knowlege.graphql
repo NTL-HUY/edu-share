@@ -146,6 +146,10 @@ mutation UpdateLesson($input: UpdateLessonInput!) {
 	}
 }
 
+mutation DeleteKnowledge($id: ID!) {
+	deleteKnowledge(id: $id)
+}
+
 query KnowledgeListByUsername($username: String!, $input: MyKnowledgeFilterInput) {
     knowledgeListByUsername(username: $username, input: $input) {
         totalElements

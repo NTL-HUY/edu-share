@@ -6,19 +6,19 @@ services:
       POSTGRES_DB: edudb
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: 123456
-    ports: # Map cổng (Port ở máy thật : Port trong container)
+    ports:
       - "5432:5432"
-    volumes: # Luu trữ dữ liệu bền vững (không mất data khi xoá container)
+    volumes:
       - pgdata:/var/lib/postgresql/data
-    networks: # Mạng nội bộ để các container giao tiếp với nhau
+    networks:
       - my-network
 
   kafka:
     image: apache/kafka:3.8.0
     container_name: kafka-edu
     ports:
-      - "9092:9092"       # dùng cho client bên ngoài container (app Spring Boot chạy local)
-      - "9093:9093"       # controller port (nội bộ)
+      - "9092:9092"
+      - "9093:9093"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller

@@ -5,10 +5,6 @@ import type { PageServerLoad } from '../../$types';
 import { API_ENDPOINTS } from '$lib/configs/api';
 
 export const load: PageServerLoad = async ({ fetch, locals, params }) => {
-	// if (!locals.user) {
-	// 	return { profile: null };
-	// }
-
 	const username = params.username;
 	
 	const isOwnProfile = locals?.user?.username === username;

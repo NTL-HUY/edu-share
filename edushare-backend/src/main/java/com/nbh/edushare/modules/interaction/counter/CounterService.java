@@ -7,7 +7,6 @@ public interface CounterService {
     void incrVote(long knowledgeId, int delta);
     void incrComment(long knowledgeId, int delta);
 
-    /** Delta hiện có trong Redis, chưa flush xuống DB (0 nếu chưa có gì). */
     CounterDelta getPendingDelta(long knowledgeId);
     void flushOne(long knowledgeId);
 }

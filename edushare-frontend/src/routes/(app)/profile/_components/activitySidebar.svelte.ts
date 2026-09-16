@@ -6,7 +6,6 @@ export type ActivitySubTab =
 export class ActivitySidebarState {
   activeSubTab = $state<ActivitySubTab>('knowledge');
 
-  // Đếm số lượng items cho từng tab (có thể update linh hoạt sau này)
   counts = $state({
     lessons: 0,
     questions: 0,

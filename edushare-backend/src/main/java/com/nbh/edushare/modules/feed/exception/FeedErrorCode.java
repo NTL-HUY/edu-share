@@ -11,7 +11,6 @@ public enum FeedErrorCode implements ErrorCode {
     INVALID_CURSOR(HttpStatus.BAD_REQUEST.value(), "Cursor không hợp lệ"),
     ;
 
-
     private final int status;
     private final String message;
 }

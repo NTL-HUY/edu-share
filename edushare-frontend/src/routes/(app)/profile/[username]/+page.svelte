@@ -23,8 +23,6 @@
       }
    });
 
-   // type MainTab = 'profile' | 'activity' | 'saves' | 'settings';
-   // let activeTab = $state<MainTab>('activity');
 
    let followerState = $state(new FollowerState(currentUsername || '', 'followers'));
    let followingState = $state(new FollowerState(currentUsername || '', 'following'));
@@ -43,7 +41,6 @@
    async function handleFollow() {
       if (!data.profile) return;
       
-      // 1. Optimistic UI update
       isFollowing = true;
       if (data.profile) data.profile.isFollowing = true;
 
@@ -59,11 +56,9 @@
 
          toast.success(`Đã theo dõi ${data.profile.fullName || currentUsername}`);
          
-         // Reload lại danh sách follower/following nếu đang mở tab đó
          followerState.loadFollowers();
          followingState.loadFollowers();
       } catch (error: any) {
-         // Rollback UI nếu lỗi
          isFollowing = false;
          if (data.profile) data.profile.isFollowing = false;
          toast.error(error.message);
@@ -73,12 +68,10 @@
    async function handleUnfollow() {
       if (!data.profile) return;
 
-      // 1. Optimistic UI update
       isFollowing = false;
       if (data.profile) data.profile.isFollowing = false;
 
       try {
-         // Sửa DELETE -> POST để khớp với API Route Handler
          const res = await fetch(`/api/users/${currentUsername}/unfollow`, {
             method: 'delete'
          });
@@ -90,11 +83,9 @@
 
          toast.success(`Đã bỏ theo dõi ${data.profile.fullName || currentUsername}`);
          
-         // Reload lại danh sách follower/following nếu đang mở tab đó
          followerState.loadFollowers();
          followingState.loadFollowers();
       } catch (error: any) {
-         // Rollback UI nếu lỗi
          isFollowing = true;
          if (data.profile) data.profile.isFollowing = true;
          toast.error('Có lỗi xảy ra, vui lòng thử lại!');
@@ -104,7 +95,6 @@
 
 <div class="space-y-2 text-slate-800">
    <!-- 1. HEADER PROFILE -->
-   <!-- Đảm bảo component ProfileHeader nhận prop profile có isFollowing cập nhật -->
    <ProfileHeader
       profile={data.profile ? { ...data.profile, isFollowing } : data.profile}
       onEditProfile={() => (isEditModalOpen = true)}

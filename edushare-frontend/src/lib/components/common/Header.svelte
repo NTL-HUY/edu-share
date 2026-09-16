@@ -21,14 +21,12 @@
 		const trimmed = searchQuery.trim();
 
 		if (!trimmed) {
-			// Nếu ô tìm kiếm trống mà bấm Enter -> Xóa param 'q' khỏi URL
 			const newUrl = new URL(page.url);
 			newUrl.searchParams.delete('q');
 			goto(newUrl.toString());
 			return;
 		}
 
-		// Ngược lại, đẩy query param mới lên URL
 		const newUrl = new URL(page.url);
 		newUrl.pathname = '/search';
 		newUrl.searchParams.set('q', trimmed);

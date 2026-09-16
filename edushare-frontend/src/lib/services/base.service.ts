@@ -4,7 +4,6 @@ export type ApiResult<T> =
   | { ok: true; data: T }
   | { ok: false; status: number; message: string; fieldErrors?: Record<string, string> };
 
-// Message mặc định khi server KHÔNG trả message (network lỗi, 500, hoặc body rỗng)
 const DEFAULT_MESSAGES: Record<number, string> = {
   401: 'Sai thông tin đăng nhập',
   403: 'Bạn không có quyền thực hiện thao tác này',
@@ -77,37 +76,3 @@ export async function apiUploadRequest<T>(
    const data: T = await res.json();
    return { ok: true, data };
 }
-// interface GraphQLResponse<T> {
-//   data?: T;
-//   errors?: { message: string; extensions?: Record<string, unknown> }[];
-// }
-
-
-
-// export async function graphqlRequest<T, V extends Record<string, unknown> = Record<string, unknown>>(
-//   fetchFn: typeof fetch,
-//   query: string,
-//   variables?: V
-// ): Promise<T> {
-//   const res = await fetchFn(API_ENDPOINTS.GRAPHQL.ENDPOINT, {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({ query, variables })
-//   });
-
-//   if (!res.ok) {
-//     throw new Error(`GraphQL request failed: ${res.status} ${res.statusText}`);
-//   }
-
-//   const json: GraphQLResponse<T> = await res.json();
-
-//   if (json.errors?.length) {
-//     throw new Error(json.errors.map((e) => e.message).join('; '));
-//   }
-
-//   if (!json.data) {
-//     throw new Error('GraphQL response missing data');
-//   }
-
-//   return json.data;
-// }

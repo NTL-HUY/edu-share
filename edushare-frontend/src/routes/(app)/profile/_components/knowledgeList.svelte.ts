@@ -38,14 +38,13 @@ async function fetchPage(userProfile: any, page: number): Promise<KnowledgePageP
 		if (classification === 'ValidationError') {
 			errorMessage = 'Dữ liệu gửi lên không hợp lệ';
 		} else if (graphQLError?.message) {
-			// fallback: log kỹ thuật, không show hết ra UI nếu không cần
 			errorMessage = 'Đã có lỗi xảy ra, vui lòng thử lại sau';
 		} else if (err?.message) {
 			errorMessage = err.message;
 		}
 
-		console.error('Lỗi khi tải replies:', err); // log full lỗi kỹ thuật cho dev
-		toast.error(errorMessage); // chỉ show message thân thiện
+		console.error('Lỗi khi tải replies:', err); 
+		toast.error(errorMessage);
 		throw err;
 	}
 }
@@ -89,6 +88,20 @@ export class KnowledgeListState {
 	removeItem(id: string) {
 		this.items = this.items.filter((i) => i.id !== id);
 		this.totalElements -= 1;
+	}
+
+	async deleteItem(id: string) {
+		const sdk = getClientSdk();
+		try {
+			await sdk.DeleteKnowledge({ id });
+			this.removeItem(id);
+			toast.success('Xoá bài đăng thành công');
+		} catch (err: any) {
+			const graphQLError = err?.response?.errors?.[0];
+			const errorMessage = graphQLError?.message ?? 'Không thể xoá bài đăng, vui lòng thử lại';
+			toast.error(errorMessage);
+			console.error('Lỗi khi xoá knowledge:', err);
+		}
 	}
 
 	updateItem(id: string, patch: Partial<KnowledgePagePayload['content'][number]>) {

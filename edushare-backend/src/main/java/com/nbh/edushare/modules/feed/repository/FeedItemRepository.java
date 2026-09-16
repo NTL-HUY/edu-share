@@ -95,4 +95,13 @@ public interface FeedItemRepository extends JpaRepository<FeedItem, Long>, JpaSp
     @Modifying
     @Query("UPDATE FeedItem fi SET fi.deletedAt = :deletedAt WHERE fi.knowledgeId = :knowledgeId AND fi.deletedAt IS NULL")
     int markDeleted(@Param("knowledgeId") Long knowledgeId, @Param("deletedAt") LocalDateTime deletedAt);
+
+    @Modifying
+    @Query("""
+        UPDATE FeedItem fi SET fi.ownerName = :ownerName, fi.ownerAvatarUrl = :ownerAvatarUrl
+        WHERE fi.ownerId = :ownerId AND fi.deletedAt IS NULL
+    """)
+    int syncOwnerInfo(@Param("ownerId") Long ownerId,
+                      @Param("ownerName") String ownerName,
+                      @Param("ownerAvatarUrl") String ownerAvatarUrl);
 }

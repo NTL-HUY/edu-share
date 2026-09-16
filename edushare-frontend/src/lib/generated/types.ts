@@ -542,7 +542,7 @@ export type GetFeedQueryVariables = Exact<{
 }>;
 
 
-export type GetFeedQuery = { getFeed: { nextCursor: string | null, hasMore: boolean, items: Array<{ knowledgeId: string, type: KnowledgeType, ownerId: string, ownerName: string, ownerAvatarUrl: string | null, title: string, thumbnailUrl: string | null, categoryId: string | null, categoryName: string | null, viewsCount: number, voteScore: number, commentCount: number, sourceCreatedAt: string, allowComment: boolean, typeMeta:
+export type GetFeedQuery = { getFeed: { nextCursor: string | null, hasMore: boolean, items: Array<{ knowledgeId: string, type: KnowledgeType, ownerId: string, ownerName: string, ownerAvatarUrl: string | null, title: string, abstractText: string | null, thumbnailUrl: string | null, categoryId: string | null, categoryName: string | null, viewsCount: number, voteScore: number, commentCount: number, sourceCreatedAt: string, allowComment: boolean, typeMeta:
         | { __typename: 'LessonFeedMeta', level: LessonLevel | null, estimateTimeInMinutes: number | null, contentMarkdown: string | null }
         | { __typename: 'QuestionFeedMeta', isResolved: boolean | null, acceptedAnswerId: string | null, content: string | null }
        | null }> } };
@@ -631,6 +631,13 @@ export type UpdateLessonMutationVariables = Exact<{
 
 
 export type UpdateLessonMutation = { updateLesson: { id: string, title: string, abstractText: string | null, thumbnailUrl: string | null, isPublic: boolean, allowComment: boolean, contentMarkdown: string | null, level: LessonLevel | null, estimateTimeInMinutes: number | null, category: { id: string } | null } };
+
+export type DeleteKnowledgeMutationVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type DeleteKnowledgeMutation = { deleteKnowledge: boolean };
 
 export type KnowledgeListByUsernameQueryVariables = Exact<{
   username: string;

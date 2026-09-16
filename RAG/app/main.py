@@ -3,12 +3,15 @@ from contextlib import asynccontextmanager
 import requests
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from langchain_core.output_parsers import StrOutputParser
 
 from app import db
 from app.config import config
 from app.dto import EmbedResponse, EmbedRequest, ChatResponse, ChatRequest, ChatSource
 from app.embedding import embed_texts
 from app.listener import start_consumer_task, stop_consumer_task
+from app.llm.llm_factory import get_llm
+from app.llm.prompts import RAG_PROMPT
 from app.rag import retrieve_context
 
 load_dotenv()
@@ -50,7 +53,7 @@ def embed(request: EmbedRequest):
 async def chat(request: ChatRequest):
     query = request.query.strip()
     if not query:
-        raise HTTPException(status_code=400, detail="query không được rỗng")
+        raise HTTPException(400, "query không được rỗng")
 
     context_text, sources = await retrieve_context(
         query=query,
@@ -58,52 +61,22 @@ async def chat(request: ChatRequest):
         visible_owner_ids=request.visibleOwnerIds,
     )
 
-    if context_text:
-        prompt = f"""Dựa vào thông tin ngữ cảnh bên dưới để trả lời câu hỏi bằng tiếng Việt một cách ngắn gọn, chính xác.
-            Nếu ngữ cảnh không đủ để trả lời, hãy nói rõ là không tìm thấy thông tin liên quan, không được bịa ra câu trả lời.
-            ---------------------
-            {context_text}
-            ---------------------
-            Câu hỏi: {query}
-            Trả lời:"""
-    else:
-        prompt = (
-            f"Câu hỏi sau không có dữ liệu liên quan trong hệ thống. "
-            f"Hãy trả lời bằng tiếng Việt rằng bạn chưa có đủ thông tin để trả lời chính xác, "
-            f"đừng tự bịa nội dung.\nCâu hỏi: {query}"
-        )
+    chain = RAG_PROMPT | get_llm(request.model) | StrOutputParser()
+
     try:
-        payload = {
-            "model": request.model or OLLAMA_MODEL,
-            "prompt": prompt,
-            "stream": request.stream,
-        }
-        response = requests.post(OLLAMA_URL, json=payload, timeout=60)
-
-        if response.status_code != 200:
-            raise HTTPException(
-                status_code=500, detail=f"Lỗi từ Ollama API: {response.text}"
-            )
-
-        data = response.json()
-        answer = data.get("response", "").strip()
-
-        return ChatResponse(
-            model=OLLAMA_MODEL,
-            answer=answer,
-            sources=[ChatSource(**s) for s in sources],
-            prompt=prompt
-        )
-
-    except requests.exceptions.ConnectionError:
-        raise HTTPException(
-            status_code=503,
-            detail="Không thể kết nối tới Ollama Docker! Hãy kiểm tra xem container edushare-ollama đã 'up' chưa.",
-        )
-    except HTTPException:
-        raise
+        answer = await chain.ainvoke({
+            "context": context_text or "(không có tài liệu liên quan)",
+            "question": query,
+        })
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(502, f"Lỗi khi gọi LLM: {e}")
+
+    return ChatResponse(
+        model=request.model or config.DEFAULT_MODEL,
+        answer=answer.strip(),
+        sources=[ChatSource(**s) for s in sources],
+        prompt="",
+    )
 
 
 if __name__ == "__main__":

@@ -69,33 +69,6 @@ export class RoomMessageState {
 		await this.loadMessages(null);
 	}
 
-	// async sendMessage(content: string) {
-	// 	if (!content.trim()) return;
-	// 	toast.info(`gui`);
-	// 	console.log('room', this.roomId, 'content', content, 'reply', this.replyingMessage?.id);
-
-	// 	// const replyToId = this.replyingMessage?.id;
-
-	// 	// try {
-	// 	//    const sdk = getClientSdk();
-	// 	//    const data = await sdk.SendRoomMessage({
-	// 	//       roomId: this.roomId,
-	// 	//       content,
-	// 	//       replyToMessageId: replyToId ?? null // Truyền id reply nếu có
-	// 	//    });
-
-	// 	//    if (data.sendMessage) {
-	// 	//       // Thêm tin nhắn mới vào danh sách
-	// 	//       this.items = [data.sendMessage, ...this.items];
-	// 	//    }
-
-	// 	//    // Gửi xong tự động hủy trạng thái reply
-	// 	//    this.cancelReply();
-	// 	// } catch (err) {
-	// 	//    this.error = err instanceof Error ? err.message : 'Gửi tin nhắn thất bại';
-	// 	//    throw err;
-	// 	// }
-	// }
 
 	addIncomingMessage(message: ChatMessage) {
 		const idx = message.clientTempId
